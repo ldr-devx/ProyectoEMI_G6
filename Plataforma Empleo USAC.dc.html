@@ -1,0 +1,942 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="stylesheet" href="_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css">
+  <script src="_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/_ds_bundle.js"></script>
+  <style>
+    body { margin: 0; }
+    a { color: var(--color-accent); }
+    a:hover { color: var(--color-accent-700); }
+    select.input { cursor: pointer; }
+    .card, .dialog { background: var(--color-surface); }
+    .btn-secondary, .btn-ghost { background: var(--color-neutral-700); border-color: var(--color-divider); }
+    .btn-secondary:hover, .btn-ghost:hover { background: var(--color-neutral-600); }
+    :root {
+      /* Re-tuned to a cool lavender-to-blue duotone (same DS roles/ramps, new hues) */
+      --color-accent-100: oklch(97% 0.02 255); --color-accent-200: oklch(92% 0.045 255); --color-accent-300: oklch(85% 0.075 255);
+      --color-accent-400: oklch(76% 0.10 255); --color-accent-500: oklch(66% 0.125 255); --color-accent-600: oklch(56% 0.135 255);
+      --color-accent-700: oklch(46% 0.125 255); --color-accent-800: oklch(35% 0.10 255); --color-accent-900: oklch(24% 0.075 255);
+      --color-accent: oklch(66% 0.125 255);
+      --color-accent-2-100: oklch(97% 0.02 300); --color-accent-2-200: oklch(92% 0.045 300); --color-accent-2-300: oklch(85% 0.075 300);
+      --color-accent-2-400: oklch(76% 0.10 300); --color-accent-2-500: oklch(66% 0.125 300); --color-accent-2-600: oklch(56% 0.135 300);
+      --color-accent-2-700: oklch(46% 0.125 300); --color-accent-2-800: oklch(35% 0.10 300); --color-accent-2-900: oklch(24% 0.075 300);
+      --color-accent-2: oklch(66% 0.125 300);
+    }
+  </style>
+</helmet>
+
+<div style="min-height:100vh; --color-bg:var(--color-neutral-900); --color-text:var(--color-neutral-100); --color-surface:var(--color-neutral-800); --color-divider:color-mix(in srgb, var(--color-neutral-100) 18%, transparent); background:linear-gradient(color-mix(in srgb, var(--color-neutral-100) 5%, transparent) 1px, transparent 1px) 0 0/100% 80px, linear-gradient(90deg, color-mix(in srgb, var(--color-neutral-100) 5%, transparent) 1px, transparent 1px) 0 0/80px 100%, var(--color-bg); display:flex; flex-direction:column; align-items:center; padding:32px 20px 60px; gap:22px; font-family:var(--font-body); color:var(--color-text); box-sizing:border-box;">
+
+  <sc-if value="{{ isEstudiante }}" hint-placeholder-val="{{ true }}">
+    <div style="width:100%; max-width:1100px; display:flex; flex-direction:column; gap:20px;">
+
+      <sc-if value="{{ isAuth }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; gap:0;">
+          <div style="background:var(--color-accent); --color-text:var(--color-neutral-900); padding:56px 32px 60px; display:flex; flex-direction:column; align-items:center; gap:16px; text-align:center;">
+            <div class="blueprint" style="width:40px; height:40px; display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:15px; color:var(--color-neutral-900);"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>UE</div>
+            <div style="font-family:var(--font-heading); font-size:38px; font-weight:600; color:var(--color-neutral-900); max-width:520px; line-height:1.1;">Conecta con tu comunidad de Ingeniería</div>
+            <div style="font-size:15px; color:color-mix(in srgb, var(--color-neutral-900) 75%, transparent); max-width:440px;">Vacantes y referidos filtrados por carrera, semestre y créditos — pensado para la Facultad de Ingeniería, USAC.</div>
+          </div>
+
+          <div style="max-width:720px; margin:0 auto; padding:40px 20px 8px; display:flex; flex-direction:column; gap:16px; width:100%; box-sizing:border-box;">
+            <div style="font-size:12px; opacity:0.55; text-align:center; text-transform:uppercase; letter-spacing:0.08em;">¿Cómo quieres continuar?</div>
+
+            <div style="display:grid; grid-template-columns:repeat(3, 1fr); gap:14px;">
+              <div class="card blueprint" style="cursor:pointer;" style-hover="border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 4%, transparent);" onClick="{{ goRegistro }}">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div class="card-kicker">Estudiante o egresado</div>
+                <div class="card-title">Buscador de empleo</div>
+                <p class="card-body">Crea tu perfil académico y postula con un clic a vacantes de tu carrera.</p>
+              </div>
+
+              <div class="card blueprint" style="cursor:pointer;" style-hover="border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 4%, transparent);" onClick="{{ goEmpresa }}">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div class="card-kicker">Empresa / institución</div>
+                <div class="card-title">Publicar una vacante</div>
+                <p class="card-body">Regístrate y publica una vacante para la comunidad de Ingeniería.</p>
+              </div>
+
+              <div class="card blueprint" style="cursor:pointer;" style-hover="border-color: var(--color-accent); background: color-mix(in srgb, var(--color-accent) 4%, transparent);" onClick="{{ goReferidor }}">
+                <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                <div class="card-kicker">Empleado saliente</div>
+                <div class="card-title">Referir mi puesto</div>
+                <p class="card-body">Deja tu puesto en buenas manos — recomienda a alguien de tu comunidad.</p>
+              </div>
+            </div>
+
+            <div style="text-align:center; font-size:13px; opacity:0.6; margin-top:4px;">¿Eres moderador de tu escuela? <a href="#" onClick="{{ setModeModerador }}">Ingresa al panel de moderación</a></div>
+          </div>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isRegistro }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:560px; margin:32px auto; display:flex; flex-direction:column; gap:14px; width:100%; background:var(--color-surface); border:1px solid var(--color-divider); padding:28px; box-sizing:border-box;">
+          <div style="display:flex; align-items:center; gap:8px; opacity:0.85;">
+            <div class="blueprint" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:10px; color:var(--color-accent-700); flex-shrink:0;"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>UE</div>
+            <span style="font-family:var(--font-heading); font-weight:600; font-size:13px;">USAC Empleos</span>
+          </div>
+          <button type="button" class="btn btn-ghost" onClick="{{ backToAuth }}" style="align-self:flex-start; padding-left:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            Volver
+          </button>
+          <div>
+            <div style="font-family:var(--font-heading); font-size:26px; font-weight:600;">Crea tu perfil académico</div>
+            <div style="font-size:13px; opacity:0.6; margin-top:4px;">Tu carrera, semestre y créditos son lo que las empresas ven primero.</div>
+          </div>
+
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; opacity:0.55; margin-top:6px;">Cuenta</div>
+          <div class="field"><label>Correo institucional</label><input class="input" type="email" value="{{ registro.correo }}" onChange="{{ updateCorreo }}" placeholder="tuusuario@usac.edu.gt" /></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="field"><label>Contraseña</label><input class="input" type="password" value="{{ registro.password }}" onChange="{{ updatePassword }}" placeholder="••••••••" /></div>
+            <div class="field"><label>Teléfono</label><input class="input" type="tel" value="{{ registro.telefono }}" onChange="{{ updateTelefono }}" placeholder="0000-0000" /></div>
+          </div>
+
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; opacity:0.55; margin-top:6px;">Datos personales</div>
+          <div class="field"><label>Nombre completo</label><input class="input" value="{{ registro.nombre }}" onChange="{{ updateNombre }}" placeholder="Tu nombre" /></div>
+
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; opacity:0.55; margin-top:6px;">Datos académicos</div>
+          <div class="field"><label>Carrera</label>
+            <select class="input" value="{{ registro.carrera }}" onChange="{{ updateCarrera }}">
+              <sc-for list="{{ carreraOptions }}" as="opt" hint-placeholder-count="6"><option value="{{ opt.value }}">{{ opt.value }}</option></sc-for>
+            </select>
+          </div>
+
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="field"><label>Semestre actual</label>
+              <select class="input" value="{{ registro.semestre }}" onChange="{{ updateSemestre }}">
+                <sc-for list="{{ semestreOptions }}" as="opt" hint-placeholder-count="10"><option value="{{ opt.value }}">{{ opt.value }}</option></sc-for>
+              </select>
+            </div>
+            <div class="field"><label>Créditos aprobados</label><input class="input" type="number" min="0" max="220" value="{{ registro.creditos }}" onChange="{{ updateCreditos }}" /></div>
+          </div>
+
+          <div class="field"><label id="estado-label">Estado académico</label>
+            <div class="seg" role="radiogroup" aria-labelledby="estado-label">
+              <label class="seg-opt"><input type="radio" name="estado" value="Activo" checked="{{ registro.estadoActivo }}" onChange="{{ updateEstado }}" />Activo</label>
+              <label class="seg-opt"><input type="radio" name="estado" value="EPS/Práctica" checked="{{ registro.estadoEPS }}" onChange="{{ updateEstado }}" />EPS/Práctica</label>
+              <label class="seg-opt"><input type="radio" name="estado" value="Graduado" checked="{{ registro.estadoGraduado }}" onChange="{{ updateEstado }}" />Graduado</label>
+            </div>
+          </div>
+
+          <div style="font-size:11px; text-transform:uppercase; letter-spacing:0.08em; opacity:0.55; margin-top:6px;">Portafolio</div>
+          <div class="field"><label>Breve descripción</label><textarea class="input" rows="3" value="{{ registro.bio }}" onChange="{{ updateBio }}" placeholder="Cuéntale a las empresas qué buscas y en qué eres bueno."></textarea></div>
+          <button type="button" class="btn btn-secondary" style="align-self:flex-start;">Adjuntar CV (PDF)</button>
+
+          <sc-if value="{{ showNotes }}" hint-placeholder-val="{{ true }}"><p style="font-size:11px; opacity:0.55; margin:0;">*Listado de escuelas de la Facultad de Ingeniería USAC — supuesto de contenido, ajustar con el catálogo oficial.</p></sc-if>
+
+          <button type="button" class="btn btn-primary btn-block blueprint" onClick="{{ submitRegistro }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Crear cuenta</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ isApp }}" hint-placeholder-val="{{ false }}">
+        <nav class="nav" style="background:var(--color-surface); border:1px solid var(--color-divider); border-bottom:none; padding:12px 16px;">
+          <div style="display:flex; align-items:center; gap:10px; margin-right:auto; flex-shrink:0;">
+            <div class="blueprint" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:12px; color:var(--color-accent-700); flex-shrink:0;"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>UE</div>
+            <span style="font-family:var(--font-heading); font-weight:600; font-size:17px; white-space:nowrap;">USAC Empleos</span>
+          </div>
+          <a href="#" onClick="{{ setTabFeed }}" style="color:{{ feedColor }}; white-space:nowrap; flex-shrink:0;">Inicio</a>
+          <a href="#" onClick="{{ setTabPostulaciones }}" style="color:{{ postColor }}; white-space:nowrap; flex-shrink:0;">Postulaciones</a>
+          <a href="#" onClick="{{ setTabNotif }}" style="color:{{ notifColor }}; display:inline-flex; align-items:center; gap:6px; white-space:nowrap; flex-shrink:0;">Notificaciones<sc-if value="{{ notifBadge }}" hint-placeholder-val="{{ false }}"><span style="width:7px; height:7px; border-radius:50%; background:var(--color-accent);"></span></sc-if></a>
+          <a href="#" onClick="{{ setTabPerfil }}" style="color:{{ perfilColor }}; white-space:nowrap; flex-shrink:0;">Perfil</a>
+          <span style="font-size:13px; opacity:0.65; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right;">{{ perfil.nombre }} · {{ perfil.carrera }}</span>
+          <button type="button" class="btn btn-secondary" onClick="{{ logout }}" style="white-space:nowrap; flex-shrink:0;">Cerrar sesión</button>
+        </nav>
+
+        <div style="background:var(--color-surface); border:1px solid var(--color-divider); border-top:none; padding:20px 20px 24px; box-sizing:border-box;">
+
+            <sc-if value="{{ tabFeed }}" hint-placeholder-val="{{ true }}">
+              <sc-if value="{{ notShowingDetail }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex; flex-direction:column; gap:16px;">
+                  <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap; border:1px solid var(--color-divider); padding:12px 14px; background:var(--color-surface);">
+                    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+                      <select class="input" value="{{ filterCarrera }}" onChange="{{ onFilterCarrera }}" style="font-size:13px; width:260px;">
+                        <option value="todas">Todas las carreras</option>
+                        <sc-for list="{{ carreraOptions }}" as="opt" hint-placeholder-count="6"><option value="{{ opt.value }}">{{ opt.value }}</option></sc-for>
+                      </select>
+                      <select class="input" value="{{ filterSemestre }}" onChange="{{ onFilterSemestre }}" style="font-size:13px; width:200px;">
+                        <option value="0">Cualquier semestre</option>
+                        <sc-for list="{{ semestreOptions }}" as="opt" hint-placeholder-count="10"><option value="{{ opt.value }}">Desde sem. {{ opt.value }}</option></sc-for>
+                      </select>
+                      <select class="input" value="{{ filterContrato }}" onChange="{{ onFilterContrato }}" style="font-size:13px; width:200px;">
+                        <option value="todos">Todo contrato</option>
+                        <option value="Pasantía">Pasantía</option>
+                        <option value="Tiempo completo">Tiempo completo</option>
+                      </select>
+                    </div>
+                    <span class="tag tag-outline" style="flex-shrink:0;">{{ filteredCount }} vacantes</span>
+                  </div>
+
+                  <sc-if value="{{ filteredEmpty }}" hint-placeholder-val="{{ false }}">
+                    <div style="text-align:center; padding:48px 12px; opacity:0.6; font-size:13px;">No hay vacantes que coincidan con estos filtros.</div>
+                  </sc-if>
+
+                  <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:16px;">
+                    <sc-for list="{{ filteredVacantes }}" as="v" hint-placeholder-count="4">
+                      <sc-if value="{{ v.esEmpresa }}" hint-placeholder-val="{{ true }}">
+                        <div class="card blueprint elev-sm" style="cursor:pointer;" style-hover="box-shadow: var(--shadow-md); border-color: var(--color-accent);" onClick="{{ v.onOpen }}">
+                          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                          <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                            <div style="width:34px; height:34px; border-radius:50%; background:var(--color-accent-100); color:var(--color-accent-800); display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:13px; flex-shrink:0;">{{ v.inicial }}</div>
+                            <span style="font-size:11px; opacity:0.5; white-space:nowrap;">{{ v.fecha }}</span>
+                          </div>
+                          <span class="tag tag-accent" style="align-self:flex-start;">Empresa</span>
+                          <div class="card-title">{{ v.puesto }}</div>
+                          <div style="font-size:13px; opacity:0.75;">{{ v.empresa }} · {{ v.ubicacion }}</div>
+                          <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:2px;">
+                            <span class="tag tag-neutral">{{ v.contrato }}</span>
+                            <span class="tag tag-neutral">Desde sem. {{ v.semestreMin }}</span>
+                          </div>
+                        </div>
+                      </sc-if>
+                      <sc-if value="{{ v.esReferido }}" hint-placeholder-val="{{ false }}">
+                        <div style="cursor:pointer; border:1px dashed var(--color-divider); border-radius:var(--radius-md); padding:12px; display:flex; flex-direction:column; gap:8px; background:color-mix(in srgb, var(--color-accent-2) 6%, transparent);" style-hover="border-color: var(--color-accent-2); background: color-mix(in srgb, var(--color-accent-2) 12%, transparent);" onClick="{{ v.onOpen }}">
+                          <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="width:30px; height:30px; border-radius:50%; background:var(--color-accent-2-100); color:var(--color-accent-2-800); display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:12px; flex-shrink:0;">{{ v.inicial }}</div>
+                            <span class="tag tag-accent-2">Referido por {{ v.referidor }}</span>
+                            <span style="font-size:11px; opacity:0.5; margin-left:auto; white-space:nowrap;">{{ v.fecha }}</span>
+                          </div>
+                          <div class="card-title" style="font-size:16px;">{{ v.puesto }}</div>
+                          <div style="font-size:13px; opacity:0.75;">{{ v.empresa }} · {{ v.ubicacion }}</div>
+                        </div>
+                      </sc-if>
+                    </sc-for>
+                  </div>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ showingDetail }}" hint-placeholder-val="{{ false }}">
+                <div style="max-width:700px; margin:0 auto;">
+                  <button type="button" class="btn btn-ghost" onClick="{{ closeVacante }}" style="margin-bottom:8px; padding-left:0;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    Volver
+                  </button>
+
+                  <sc-if value="{{ vacante.esEmpresa }}" hint-placeholder-val="{{ true }}">
+                    <div class="card blueprint elev-md">
+                      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                      <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:44px; height:44px; border-radius:50%; background:var(--color-accent-100); color:var(--color-accent-800); display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:16px; flex-shrink:0;">{{ vacante.inicial }}</div>
+                        <div>
+                          <span class="tag tag-accent">Empresa</span>
+                          <div class="card-title" style="font-size:22px; margin-top:2px;">{{ vacante.puesto }}</div>
+                        </div>
+                      </div>
+                      <div style="font-size:15px; opacity:0.8;">{{ vacante.empresa }} · {{ vacante.ubicacion }}</div>
+                      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <span class="tag tag-neutral">{{ vacante.contrato }}</span>
+                        <span class="tag tag-neutral">{{ vacante.modalidad }}</span>
+                        <span class="tag tag-neutral">Desde sem. {{ vacante.semestreMin }}</span>
+                      </div>
+                      <p class="card-body" style="opacity:1; font-size:14px;">{{ vacante.descripcion }}</p>
+                      <div style="font-size:11px; opacity:0.6; text-transform:uppercase; letter-spacing:0.06em; margin-top:2px;">Requisitos</div>
+                      <ul style="margin:0; padding-left:18px; font-size:13px; display:flex; flex-direction:column; gap:4px;">
+                        <sc-for list="{{ vacante.requisitos }}" as="r" hint-placeholder-count="3"><li>{{ r }}</li></sc-for>
+                      </ul>
+                      <div style="font-size:12px; opacity:0.55;">Carreras compatibles: {{ vacante.carrerasTxt }}</div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ vacante.esReferido }}" hint-placeholder-val="{{ false }}">
+                    <div style="border:1px dashed var(--color-divider); border-radius:var(--radius-md); padding:20px; display:flex; flex-direction:column; gap:10px; background:color-mix(in srgb, var(--color-accent-2) 6%, transparent);">
+                      <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:44px; height:44px; border-radius:50%; background:var(--color-accent-2-100); color:var(--color-accent-2-800); display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:16px; flex-shrink:0;">{{ vacante.inicial }}</div>
+                        <div>
+                          <span class="tag tag-accent-2">Referido por {{ vacante.referidor }}</span>
+                          <div class="card-title" style="font-size:22px; margin-top:2px;">{{ vacante.puesto }}</div>
+                        </div>
+                      </div>
+                      <div style="font-size:15px; opacity:0.8;">{{ vacante.empresa }} · {{ vacante.ubicacion }}</div>
+                      <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                        <span class="tag tag-neutral">{{ vacante.contrato }}</span>
+                        <span class="tag tag-neutral">{{ vacante.modalidad }}</span>
+                        <span class="tag tag-neutral">Desde sem. {{ vacante.semestreMin }}</span>
+                      </div>
+                      <p style="font-size:14px; font-style:italic; opacity:0.85; margin:0;">"{{ vacante.notaReferido }}"</p>
+                      <div style="font-size:12px; opacity:0.55;">Carreras compatibles: {{ vacante.carrerasTxt }}</div>
+                    </div>
+                  </sc-if>
+
+                  <sc-if value="{{ yaPostulado }}" hint-placeholder-val="{{ false }}"><button type="button" class="btn btn-secondary btn-block" disabled style="margin-top:12px;">Ya postulaste ✓</button></sc-if>
+                  <sc-if value="{{ notYaPostulado }}" hint-placeholder-val="{{ true }}">
+                    <button type="button" class="btn btn-primary btn-block blueprint" style="margin-top:12px;" onClick="{{ postular }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Postular con mi perfil</button>
+                    <sc-if value="{{ vacante.esReferido }}" hint-placeholder-val="{{ false }}"><div style="font-size:11px; opacity:0.5; text-align:center; margin-top:6px;">Es una recomendación personal, no una vacante formal — tu postulación se envía igual a través de la plataforma.</div></sc-if>
+                  </sc-if>
+                </div>
+              </sc-if>
+            </sc-if>
+
+            <sc-if value="{{ tabPostulaciones }}" hint-placeholder-val="{{ false }}">
+              <div style="max-width:760px; margin:0 auto; display:flex; flex-direction:column; gap:10px;">
+                <div class="card-kicker">Tu actividad</div>
+                <div style="font-family:var(--font-heading); font-size:22px; font-weight:600; margin-top:-6px;">Mis postulaciones</div>
+                <sc-if value="{{ postulacionesEmpty }}" hint-placeholder-val="{{ true }}">
+                  <div style="text-align:center; padding:48px 12px; opacity:0.6; font-size:13px; display:flex; flex-direction:column; gap:10px; align-items:center;">
+                    <span>Aún no te has postulado a ninguna vacante.</span>
+                    <button type="button" class="btn btn-secondary" onClick="{{ setTabFeed }}">Ver vacantes</button>
+                  </div>
+                </sc-if>
+                <sc-for list="{{ postulacionesList }}" as="p" hint-placeholder-count="2">
+                  <div class="card" style="border:1px solid var(--color-divider);">
+                    <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                      <div class="card-title" style="font-size:15px;">{{ p.puesto }}</div>
+                      <span class="{{ p.tagClass }}">{{ p.estado }}</span>
+                    </div>
+                    <div style="font-size:12px; opacity:0.7;">{{ p.empresa }} · postulado {{ p.fecha }}</div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tabNotif }}" hint-placeholder-val="{{ false }}">
+              <div style="max-width:700px; margin:0 auto; display:flex; flex-direction:column; gap:2px;">
+                <div class="card-kicker">Alertas</div>
+                <div style="font-family:var(--font-heading); font-size:22px; font-weight:600; margin:-4px 0 6px;">Notificaciones</div>
+                <sc-for list="{{ notifList }}" as="n" hint-placeholder-count="4">
+                  <div style="display:flex; gap:10px; align-items:flex-start; padding:10px 0; border-bottom:1px solid var(--color-divider); cursor:pointer;" style-hover="background: color-mix(in srgb, var(--color-text) 4%, transparent);" onClick="{{ n.onOpen }}">
+                    <div style="width:8px; height:8px; border-radius:50%; margin-top:6px; flex-shrink:0; background:{{ n.dotColor }};"></div>
+                    <div style="flex:1;">
+                      <div style="font-size:13px; line-height:1.4;">{{ n.texto }}</div>
+                      <div style="font-size:11px; opacity:0.5; margin-top:2px;">{{ n.tiempo }}</div>
+                    </div>
+                  </div>
+                </sc-for>
+              </div>
+            </sc-if>
+
+            <sc-if value="{{ tabPerfil }}" hint-placeholder-val="{{ false }}">
+              <div style="max-width:480px; margin:0 auto; display:flex; flex-direction:column; gap:14px;">
+                <div style="display:flex; align-items:center; gap:12px;">
+                  <div style="width:56px; height:56px; border-radius:50%; background:var(--color-accent-200); display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-size:19px; color:var(--color-accent-800); flex-shrink:0;">{{ perfil.iniciales }}</div>
+                  <div>
+                    <div style="font-family:var(--font-heading); font-size:18px; font-weight:600;">{{ perfil.nombre }}</div>
+                    <div style="font-size:12px; opacity:0.65;">{{ perfil.carrera }}</div>
+                  </div>
+                </div>
+                <div class="card">
+                  <div class="card-kicker">Contacto</div>
+                  <div style="display:flex; justify-content:space-between; font-size:13px;"><span>Correo</span><span>{{ perfil.correo }}</span></div>
+                  <div style="display:flex; justify-content:space-between; font-size:13px;"><span>Teléfono</span><span>{{ perfil.telefono }}</span></div>
+                </div>
+                <div class="card blueprint">
+                  <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+                  <div class="card-kicker">Información académica</div>
+                  <div style="display:flex; justify-content:space-between; font-size:13px;"><span>Semestre</span><span>{{ perfil.semestre }}°</span></div>
+                  <div style="display:flex; justify-content:space-between; font-size:13px;"><span>Créditos aprobados</span><span>{{ perfil.creditos }} / {{ perfil.creditosTotal }}</span></div>
+                  <div style="height:5px; background:var(--color-neutral-200); border-radius:2px; overflow:hidden;"><div style="height:100%; width:{{ perfil.creditosPct }}%; background:var(--color-accent);"></div></div>
+                  <div style="display:flex; justify-content:space-between; align-items:center; font-size:13px; margin-top:2px;"><span>Estado</span><span class="tag tag-accent">{{ perfil.estado }}</span></div>
+                </div>
+                <button type="button" class="btn btn-secondary blueprint"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Ver CV (PDF)</button>
+                <button type="button" class="btn btn-secondary" onClick="{{ logout }}" style="align-self:flex-start;">Cerrar sesión</button>
+              </div>
+            </sc-if>
+
+        </div>
+      </sc-if>
+
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isEmpresaFlow }}" hint-placeholder-val="{{ false }}">
+    <div style="width:100%; max-width:1100px; display:flex; flex-direction:column; gap:20px;">
+
+      <sc-if value="{{ empIsRegistro }}" hint-placeholder-val="{{ true }}">
+        <div style="max-width:560px; margin:32px auto; display:flex; flex-direction:column; gap:14px; width:100%; background:var(--color-surface); border:1px solid var(--color-divider); padding:28px; box-sizing:border-box;">
+          <div style="display:flex; align-items:center; gap:8px; opacity:0.85;">
+            <div class="blueprint" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:10px; color:var(--color-accent-700); flex-shrink:0;"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>UE</div>
+            <span style="font-family:var(--font-heading); font-weight:600; font-size:13px;">USAC Empleos</span>
+          </div>
+          <button type="button" class="btn btn-ghost" onClick="{{ goHome }}" style="align-self:flex-start; padding-left:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            Volver
+          </button>
+          <div>
+            <div style="font-family:var(--font-heading); font-size:26px; font-weight:600;">Registra tu empresa</div>
+            <div style="font-size:13px; opacity:0.6; margin-top:4px;">Toda vacante pasa por verificación antes de publicarse en el feed de estudiantes.</div>
+          </div>
+          <div class="field"><label>Nombre de la empresa</label><input class="input" value="{{ empresaForm.nombreEmpresa }}" onChange="{{ updateEmpresaNombre }}" placeholder="Ej. Tigo Guatemala" /></div>
+          <div class="field"><label>Correo de contacto</label><input class="input" type="email" value="{{ empresaForm.correo }}" onChange="{{ updateEmpresaCorreo }}" placeholder="rrhh@empresa.com" /></div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="field"><label>Sector</label><input class="input" value="{{ empresaForm.sector }}" onChange="{{ updateEmpresaSector }}" placeholder="Ej. Tecnología" /></div>
+            <div class="field"><label>Sitio web</label><input class="input" value="{{ empresaForm.sitio }}" onChange="{{ updateEmpresaSitio }}" placeholder="www.empresa.com" /></div>
+          </div>
+          <button type="button" class="btn btn-primary btn-block blueprint" onClick="{{ irAPublicarEmpresa }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Continuar</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ empIsPublicar }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:560px; margin:32px auto; display:flex; flex-direction:column; gap:14px; width:100%; background:var(--color-surface); border:1px solid var(--color-divider); padding:28px; box-sizing:border-box;">
+          <div style="display:flex; align-items:center; gap:8px; opacity:0.85;">
+            <div class="blueprint" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:10px; color:var(--color-accent-700); flex-shrink:0;"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>UE</div>
+            <span style="font-family:var(--font-heading); font-weight:600; font-size:13px;">USAC Empleos</span>
+          </div>
+          <button type="button" class="btn btn-ghost" onClick="{{ volverARegistroEmpresa }}" style="align-self:flex-start; padding-left:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            Volver
+          </button>
+          <div>
+            <div style="font-family:var(--font-heading); font-size:26px; font-weight:600;">Publica una vacante</div>
+            <div style="font-size:13px; opacity:0.6; margin-top:4px;">{{ empresaForm.nombreEmpresa }}</div>
+          </div>
+          <div class="field"><label>Puesto</label><input class="input" value="{{ empresaVacanteForm.puesto }}" onChange="{{ updateEVPuesto }}" placeholder="Ej. Practicante de Marketing" /></div>
+          <div class="field"><label>Carrera compatible</label>
+            <select class="input" value="{{ empresaVacanteForm.carrera }}" onChange="{{ updateEVCarrera }}">
+              <sc-for list="{{ carreraOptions }}" as="opt" hint-placeholder-count="6"><option value="{{ opt.value }}">{{ opt.value }}</option></sc-for>
+            </select>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="field"><label>Semestre mínimo</label>
+              <select class="input" value="{{ empresaVacanteForm.semestreMin }}" onChange="{{ updateEVSemestre }}">
+                <sc-for list="{{ semestreOptions }}" as="opt" hint-placeholder-count="10"><option value="{{ opt.value }}">{{ opt.value }}</option></sc-for>
+              </select>
+            </div>
+            <div class="field"><label>Modalidad</label>
+              <select class="input" value="{{ empresaVacanteForm.modalidad }}" onChange="{{ updateEVModalidad }}">
+                <option value="Presencial">Presencial</option>
+                <option value="Remoto">Remoto</option>
+                <option value="Híbrido">Híbrido</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="field"><label>Tipo de contrato</label>
+              <select class="input" value="{{ empresaVacanteForm.contrato }}" onChange="{{ updateEVContrato }}">
+                <option value="Pasantía">Pasantía</option>
+                <option value="Tiempo completo">Tiempo completo</option>
+                <option value="Tiempo parcial">Tiempo parcial</option>
+              </select>
+            </div>
+            <div class="field"><label>Ubicación</label><input class="input" value="{{ empresaVacanteForm.ubicacion }}" onChange="{{ updateEVUbicacion }}" placeholder="Ciudad de Guatemala" /></div>
+          </div>
+          <div class="field"><label>Descripción</label><textarea class="input" rows="3" value="{{ empresaVacanteForm.descripcion }}" onChange="{{ updateEVDescripcion }}" placeholder="¿En qué consiste el puesto?"></textarea></div>
+          <div class="field"><label>Requisitos (uno por línea)</label><textarea class="input" rows="3" value="{{ empresaVacanteForm.requisitos }}" onChange="{{ updateEVRequisitos }}" placeholder="Cursando 5to semestre o superior"></textarea></div>
+          <button type="button" class="btn btn-primary btn-block blueprint" onClick="{{ publicarVacanteEmpresa }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Publicar vacante</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ empIsListo }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:520px; margin:64px auto; display:flex; flex-direction:column; gap:14px; width:100%; text-align:center; align-items:center;">
+          <div class="card blueprint elev-md" style="width:100%; text-align:left;">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <span class="tag tag-accent-2" style="align-self:flex-start;">Enviado a revisión</span>
+            <div class="card-title" style="font-size:20px;">Tu vacante fue enviada</div>
+            <p class="card-body">Un moderador la revisará antes de que aparezca en el feed de estudiantes.</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="btn btn-secondary" onClick="{{ irAPublicarEmpresa }}">Publicar otra vacante</button>
+            <button type="button" class="btn btn-ghost" onClick="{{ goHome }}">Volver al inicio</button>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isReferidorFlow }}" hint-placeholder-val="{{ false }}">
+    <div style="width:100%; max-width:1100px; display:flex; flex-direction:column; gap:20px;">
+
+      <sc-if value="{{ refIsRegistro }}" hint-placeholder-val="{{ true }}">
+        <div style="max-width:560px; margin:32px auto; display:flex; flex-direction:column; gap:14px; width:100%; background:var(--color-surface); border:1px solid var(--color-divider); padding:28px; box-sizing:border-box;">
+          <div style="display:flex; align-items:center; gap:8px; opacity:0.85;">
+            <div class="blueprint" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:10px; color:var(--color-accent-700); flex-shrink:0;"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>UE</div>
+            <span style="font-family:var(--font-heading); font-weight:600; font-size:13px;">USAC Empleos</span>
+          </div>
+          <button type="button" class="btn btn-ghost" onClick="{{ goHome }}" style="align-self:flex-start; padding-left:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            Volver
+          </button>
+          <div>
+            <div style="font-family:var(--font-heading); font-size:26px; font-weight:600;">Recomienda a alguien de tu comunidad</div>
+            <div style="font-size:13px; opacity:0.6; margin-top:4px;">Dejas un puesto y quieres que quede en buenas manos — cuéntanos quién eres.</div>
+          </div>
+          <div class="field"><label>Nombre completo</label><input class="input" value="{{ referidorForm.nombre }}" onChange="{{ updateRefNombre }}" placeholder="Tu nombre" /></div>
+          <div class="field"><label>Correo</label><input class="input" type="email" value="{{ referidorForm.correo }}" onChange="{{ updateRefCorreo }}" placeholder="tu@correo.com" /></div>
+          <div class="field"><label>Carrera de la que egresaste</label>
+            <select class="input" value="{{ referidorForm.carrera }}" onChange="{{ updateRefCarreraPropia }}">
+              <sc-for list="{{ carreraOptions }}" as="opt" hint-placeholder-count="6"><option value="{{ opt.value }}">{{ opt.value }}</option></sc-for>
+            </select>
+          </div>
+          <button type="button" class="btn btn-primary btn-block blueprint" onClick="{{ irAPublicarReferido }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Continuar</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ refIsPublicar }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:560px; margin:32px auto; display:flex; flex-direction:column; gap:14px; width:100%; background:var(--color-surface); border:1px solid var(--color-divider); padding:28px; box-sizing:border-box;">
+          <div style="display:flex; align-items:center; gap:8px; opacity:0.85;">
+            <div class="blueprint" style="width:26px; height:26px; display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:10px; color:var(--color-accent-700); flex-shrink:0;"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>UE</div>
+            <span style="font-family:var(--font-heading); font-weight:600; font-size:13px;">USAC Empleos</span>
+          </div>
+          <button type="button" class="btn btn-ghost" onClick="{{ volverARegistroReferido }}" style="align-self:flex-start; padding-left:0;">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+            Volver
+          </button>
+          <div>
+            <div style="font-family:var(--font-heading); font-size:26px; font-weight:600;">Describe el puesto que dejas</div>
+            <div style="font-size:13px; opacity:0.6; margin-top:4px;">Esto se publicará como una recomendación personal, no como vacante formal.</div>
+          </div>
+          <div class="field"><label>Puesto</label><input class="input" value="{{ referidoPostForm.puesto }}" onChange="{{ updateRPPuesto }}" placeholder="Ej. Analista de Datos Jr." /></div>
+          <div class="field"><label>Empresa</label><input class="input" value="{{ referidoPostForm.empresa }}" onChange="{{ updateRPEmpresa }}" placeholder="Nombre de la empresa" /></div>
+          <div class="field"><label>Carrera compatible</label>
+            <select class="input" value="{{ referidoPostForm.carrera }}" onChange="{{ updateRPCarrera }}">
+              <sc-for list="{{ carreraOptions }}" as="opt" hint-placeholder-count="6"><option value="{{ opt.value }}">{{ opt.value }}</option></sc-for>
+            </select>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="field"><label>Semestre mínimo</label>
+              <select class="input" value="{{ referidoPostForm.semestreMin }}" onChange="{{ updateRPSemestre }}">
+                <sc-for list="{{ semestreOptions }}" as="opt" hint-placeholder-count="10"><option value="{{ opt.value }}">{{ opt.value }}</option></sc-for>
+              </select>
+            </div>
+            <div class="field"><label>Modalidad</label>
+              <select class="input" value="{{ referidoPostForm.modalidad }}" onChange="{{ updateRPModalidad }}">
+                <option value="Presencial">Presencial</option>
+                <option value="Remoto">Remoto</option>
+                <option value="Híbrido">Híbrido</option>
+              </select>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px;">
+            <div class="field"><label>Tipo de contrato</label>
+              <select class="input" value="{{ referidoPostForm.contrato }}" onChange="{{ updateRPContrato }}">
+                <option value="Pasantía">Pasantía</option>
+                <option value="Tiempo completo">Tiempo completo</option>
+                <option value="Tiempo parcial">Tiempo parcial</option>
+              </select>
+            </div>
+            <div class="field"><label>Ubicación</label><input class="input" value="{{ referidoPostForm.ubicacion }}" onChange="{{ updateRPUbicacion }}" placeholder="Ciudad de Guatemala" /></div>
+          </div>
+          <div class="field"><label>Tu nota personal</label><textarea class="input" rows="3" value="{{ referidoPostForm.nota }}" onChange="{{ updateRPNota }}" placeholder="¿Por qué dejas el puesto? ¿Qué debería saber quien aplique?"></textarea></div>
+          <div class="field"><label>Enlace de postulación oficial (opcional)</label><input class="input" value="{{ referidoPostForm.linkOficial }}" onChange="{{ updateRPLink }}" placeholder="https://..." /></div>
+          <button type="button" class="btn btn-primary btn-block blueprint" onClick="{{ publicarVacanteReferido }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Publicar recomendación</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ refIsListo }}" hint-placeholder-val="{{ false }}">
+        <div style="max-width:520px; margin:64px auto; display:flex; flex-direction:column; gap:14px; width:100%; text-align:center; align-items:center;">
+          <div style="border:1px dashed var(--color-divider); border-radius:var(--radius-md); padding:20px; width:100%; text-align:left; background:color-mix(in srgb, var(--color-accent-2) 6%, transparent);">
+            <span class="tag tag-accent-2" style="align-self:flex-start;">Enviado a revisión</span>
+            <div class="card-title" style="font-size:20px; margin-top:6px;">Tu recomendación fue enviada</div>
+            <p style="font-size:13px; opacity:0.8; margin:6px 0 0;">Un moderador la revisará antes de que aparezca en el feed de estudiantes.</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button type="button" class="btn btn-secondary" onClick="{{ irAPublicarReferido }}">Publicar otra recomendación</button>
+            <button type="button" class="btn btn-ghost" onClick="{{ goHome }}">Volver al inicio</button>
+          </div>
+        </div>
+      </sc-if>
+
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ isModerador }}" hint-placeholder-val="{{ false }}">
+    <div style="width:100%; max-width:1100px; display:flex; flex-direction:column; gap:20px;">
+      <nav class="nav" style="background:var(--color-surface); border:1px solid var(--color-divider); border-bottom:none; padding:12px 16px;">
+        <div style="display:flex; align-items:center; gap:10px; margin-right:auto; flex-shrink:0;">
+          <div class="blueprint" style="width:32px; height:32px; display:flex; align-items:center; justify-content:center; font-family:var(--font-heading); font-weight:600; font-size:12px; color:var(--color-accent-700); flex-shrink:0;"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>UE</div>
+          <span style="font-family:var(--font-heading); font-weight:600; font-size:17px; white-space:nowrap;">USAC Empleos</span>
+        </div>
+        <a href="#" onClick="{{ setModTabCola }}" style="color:{{ modColaColor }}; white-space:nowrap; flex-shrink:0;">Cola de verificación</a>
+        <a href="#" onClick="{{ setModTabHistorial }}" style="color:{{ modHistColor }}; white-space:nowrap; flex-shrink:0;">Historial</a>
+        <span style="font-size:13px; opacity:0.6; flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right;">Moderador · Escuela de Ciencias y Sistemas</span>
+        <button type="button" class="btn btn-secondary" onClick="{{ setModeEstudiante }}" style="white-space:nowrap; flex-shrink:0;">Salir del panel</button>
+      </nav>
+
+      <sc-if value="{{ modTabCola }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-direction:column; gap:12px; background:var(--color-surface); border:1px solid var(--color-divider); padding:20px; box-sizing:border-box;">
+          <div class="card-kicker">Moderación</div>
+          <div style="font-family:var(--font-heading); font-size:22px; font-weight:600; margin-top:-6px;">Cola de verificación</div>
+          <sc-if value="{{ queuePendienteEmpty }}" hint-placeholder-val="{{ false }}"><div style="opacity:0.6; font-size:13px; padding:24px 0;">No hay elementos pendientes de revisión.</div></sc-if>
+          <table class="table">
+            <thead><tr><th>Tipo</th><th>Nombre</th><th>Detalle</th><th>Fecha</th><th>Estado</th><th></th></tr></thead>
+            <tbody>
+              <sc-for list="{{ queuePendiente }}" as="q" hint-placeholder-count="3">
+                <tr>
+                  <td><span class="tag tag-neutral">{{ q.tipoLabel }}</span></td>
+                  <td>{{ q.nombre }}</td>
+                  <td style="opacity:0.7; max-width:340px;">{{ q.meta }}</td>
+                  <td>{{ q.fecha }}</td>
+                  <td><span class="{{ q.tagClass }}">{{ q.estado }}</span></td>
+                  <td><button type="button" class="btn btn-secondary" onClick="{{ q.onReview }}">Revisar</button></td>
+                </tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ modTabHistorial }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:12px; background:var(--color-surface); border:1px solid var(--color-divider); padding:20px; box-sizing:border-box;">
+          <div class="card-kicker">Moderación</div>
+          <div style="font-family:var(--font-heading); font-size:22px; font-weight:600; margin-top:-6px;">Historial</div>
+          <sc-if value="{{ queueHistorialEmpty }}" hint-placeholder-val="{{ false }}"><div style="opacity:0.6; font-size:13px; padding:24px 0;">Sin historial todavía.</div></sc-if>
+          <table class="table">
+            <thead><tr><th>Tipo</th><th>Nombre</th><th>Fecha</th><th>Estado</th></tr></thead>
+            <tbody>
+              <sc-for list="{{ queueHistorial }}" as="q" hint-placeholder-count="2">
+                <tr><td><span class="tag tag-neutral">{{ q.tipoLabel }}</span></td><td>{{ q.nombre }}</td><td>{{ q.fecha }}</td><td><span class="{{ q.tagClass }}">{{ q.estado }}</span></td></tr>
+              </sc-for>
+            </tbody>
+          </table>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ showNotes }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:12px; opacity:0.5;">*Datos de ejemplo. La verificación real usaría el correo institucional @usac.edu.gt y documentación fiscal — fuera de alcance de esta iteración.</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ modShowDialog }}" hint-placeholder-val="{{ false }}">
+    <div class="dialog-backdrop" onClick="{{ closeReview }}">
+      <div class="dialog" onClick="{{ stopClick }}">
+        <div class="dialog-title">Revisar — {{ modSelected.tipoLabel }}</div>
+        <div class="dialog-body">
+          <div style="font-weight:600; margin-bottom:4px;">{{ modSelected.nombre }}</div>
+          <div style="opacity:0.7; font-size:13px; margin-bottom:8px;">{{ modSelected.meta }}</div>
+          <div>{{ modSelected.detalle }}</div>
+        </div>
+        <div class="dialog-actions">
+          <button type="button" class="btn btn-secondary" onClick="{{ rejectSelected }}">Rechazar</button>
+          <button type="button" class="btn btn-primary blueprint" onClick="{{ approveSelected }}"><i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>Aprobar</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{
+  &quot;$preview&quot;: {&quot;width&quot;: 1200, &quot;height&quot;: 960},
+  &quot;initialMode&quot;: {&quot;editor&quot;: &quot;enum&quot;, &quot;default&quot;: &quot;estudiante&quot;, &quot;tsType&quot;: &quot;string&quot;, &quot;options&quot;: [&quot;estudiante&quot;, &quot;moderador&quot;], &quot;section&quot;: &quot;Comportamiento&quot;},
+  &quot;demoDataPrefill&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Comportamiento&quot;},
+  &quot;showAssumptionNotes&quot;: {&quot;editor&quot;: &quot;boolean&quot;, &quot;default&quot;: true, &quot;tsType&quot;: &quot;boolean&quot;, &quot;section&quot;: &quot;Comportamiento&quot;}
+}">
+const CARRERAS = [
+  'Ingeniería en Ciencias y Sistemas',
+  'Ingeniería Civil',
+  'Ingeniería Industrial',
+  'Ingeniería Mecánica Eléctrica',
+  'Ingeniería Química',
+  'Ingeniería Mecánica',
+];
+
+const VACANTES = [
+  {id:1, tipo:'empresa', empresa:'Tigo Guatemala', puesto:'Practicante de Desarrollo Backend', carreras:['Ingeniería en Ciencias y Sistemas'], semestreMin:6, modalidad:'Híbrido', contrato:'Pasantía', ubicacion:'Ciudad de Guatemala', fecha:'01 ago 2026', descripcion:'Apoyo al equipo de plataformas digitales en el desarrollo de servicios internos con Node.js y PostgreSQL. Incluye mentoría técnica semanal.', requisitos:['Cursando 6to semestre o superior','Conocimientos de bases de datos relacionales','Disponibilidad de 20 horas/semana']},
+  {id:2, tipo:'referido', empresa:'BAC Credomatic', puesto:'Analista de Datos Jr.', carreras:['Ingeniería en Ciencias y Sistemas','Ingeniería Industrial'], semestreMin:7, modalidad:'Remoto', contrato:'Tiempo completo', ubicacion:'Remoto', fecha:'28 jul 2026', referidor:'Diego Morales', notaReferido:'Dejo este puesto para hacer una maestría afuera. Es un buen equipo para alguien organizado, con SQL y Python — yo entré recién graduado.'},
+  {id:3, tipo:'empresa', empresa:'Cementos Progreso', puesto:'Practicante de Ingeniería Industrial', carreras:['Ingeniería Industrial'], semestreMin:5, modalidad:'Presencial', contrato:'Pasantía', ubicacion:'San Miguel Petapa', fecha:'30 jul 2026', descripcion:'Apoyo en el área de mejora continua: toma de tiempos, documentación de procesos y propuestas de optimización en planta.', requisitos:['Cursando 5to semestre o superior','Manejo de Excel avanzado','Disponibilidad presencial 3 días/semana']},
+  {id:4, tipo:'referido', empresa:'Pepsi Guatemala', puesto:'Soporte Eléctrico de Planta', carreras:['Ingeniería Mecánica Eléctrica','Ingeniería Mecánica'], semestreMin:8, modalidad:'Presencial', contrato:'Tiempo completo', ubicacion:'Amatitlán', fecha:'25 jul 2026', referidor:'Ana Recinos', notaReferido:'Me cambio de planta. El turno es rotativo pero pagan bien las horas extra y aprendí muchísimo de mantenimiento industrial acá.'},
+  {id:5, tipo:'empresa', empresa:'Grupo Bimbo', puesto:'Analista de Procesos Químicos', carreras:['Ingeniería Química'], semestreMin:6, modalidad:'Presencial', contrato:'Pasantía', ubicacion:'Ciudad de Guatemala', fecha:'22 jul 2026', descripcion:'Control de calidad de materia prima e insumos, apoyo en auditorías internas de proceso.', requisitos:['Cursando 6to semestre o superior','Cursos aprobados de química industrial']},
+  {id:6, tipo:'empresa', empresa:'Banco Industrial', puesto:'Pasante de Infraestructura TI', carreras:['Ingeniería en Ciencias y Sistemas'], semestreMin:4, modalidad:'Híbrido', contrato:'Pasantía', ubicacion:'Ciudad de Guatemala', fecha:'18 jul 2026', descripcion:'Soporte a la mesa de infraestructura: monitoreo de servidores, tickets de red y documentación técnica.', requisitos:['Cursando 4to semestre o superior','Nociones de redes y sistemas operativos']},
+];
+
+const NOTIFICACIONES = [
+  {id:1, tipo:'vacante', vacanteId:6, texto:'Nueva vacante compatible con tu carrera: Pasante de Infraestructura TI en Banco Industrial.', tiempo:'hace 2 h', leida:false},
+  {id:2, tipo:'postulacion', vacanteId:1, texto:'Tu postulación a Practicante de Desarrollo Backend cambió a "En revisión".', tiempo:'hace 1 día', leida:false},
+  {id:3, tipo:'vacante', vacanteId:2, texto:'Diego Morales recomendó a alguien de tu comunidad para Analista de Datos Jr.', tiempo:'hace 2 días', leida:true},
+  {id:4, tipo:'postulacion', vacanteId:3, texto:'Cementos Progreso revisó tu perfil para Practicante de Ingeniería Industrial.', tiempo:'hace 3 días', leida:true},
+];
+
+const QUEUE_INICIAL = [
+  {id:1, tipo:'empresa', nombre:'StartUp Devz S.A.', meta:'rrhh@startupdevz.com', detalle:'Solicita publicar 3 vacantes de pasantía en desarrollo web. Adjunta patente de comercio.', fecha:'04 ago 2026', estado:'pendiente'},
+  {id:2, tipo:'contenido', nombre:'Publicación de referido — "Puesto en Claro Guatemala"', meta:'reportado por 2 usuarios', detalle:'El post no incluye enlace de postulación oficial ni datos verificables de la empresa.', fecha:'03 ago 2026', estado:'pendiente'},
+  {id:3, tipo:'empresa', nombre:'Consultora Andina', meta:'contacto@consultoraandina.gt', detalle:'Nueva empresa solicitando cuenta institucional para publicar vacantes.', fecha:'02 ago 2026', estado:'pendiente'},
+  {id:4, tipo:'empresa', nombre:'Grupo Bimbo', meta:'talento@bimbo.com.gt', detalle:'Verificación institucional inicial completada con documentación fiscal.', fecha:'20 jul 2026', estado:'aprobado'},
+  {id:5, tipo:'contenido', nombre:'Publicación de referido — "Analista Jr. en empresa X"', meta:'marcado por el sistema', detalle:'El contenido incluía un número de teléfono personal, fuera de política de la plataforma.', fecha:'18 jul 2026', estado:'rechazado'},
+];
+
+const DEMO_REGISTRO = {nombre:'María Fernanda López', correo:'mflopez@usac.edu.gt', password:'••••••••', telefono:'5512-3456', carrera:CARRERAS[0], semestre:7, creditos:187, estado:'Activo', bio:'Interesada en desarrollo backend y bases de datos. Busco una pasantía para EPS.'};
+const EMPTY_REGISTRO = {nombre:'', correo:'', password:'', telefono:'', carrera:CARRERAS[0], semestre:5, creditos:0, estado:'Activo', bio:''};
+
+class Component extends DCLogic {
+  state = {
+    mode: 'estudiante',
+    studentScreen: 'auth',
+    appTab: 'feed',
+    selectedVacanteId: null,
+    filterCarrera: 'todas',
+    filterSemestre: 0,
+    filterContrato: 'todos',
+    registro: EMPTY_REGISTRO,
+    postulaciones: [],
+    notifLeidas: {},
+    moderatorTab: 'cola',
+    moderatorSelectedId: null,
+    queue: QUEUE_INICIAL.map(q => ({...q})),
+    empresaScreen: 'registro',
+    empresaForm: {nombreEmpresa: '', correo: '', sector: '', sitio: ''},
+    empresaVacanteForm: {puesto: '', carrera: CARRERAS[0], semestreMin: 5, modalidad: 'Presencial', contrato: 'Pasantía', ubicacion: '', descripcion: '', requisitos: ''},
+    referidorScreen: 'registro',
+    referidorForm: {nombre: '', correo: '', carrera: CARRERAS[0]},
+    referidoPostForm: {puesto: '', empresa: '', carrera: CARRERAS[0], semestreMin: 5, modalidad: 'Presencial', contrato: 'Tiempo completo', ubicacion: '', nota: '', linkOficial: ''},
+    vacantesExtra: [],
+    nextId: 100,
+  };
+
+  componentDidMount() {
+    const prefill = this.props.demoDataPrefill !== false;
+    this.setState({
+      mode: this.props.initialMode || 'estudiante',
+      studentScreen: prefill ? 'app' : 'auth',
+      registro: prefill ? {...DEMO_REGISTRO} : EMPTY_REGISTRO,
+    });
+  }
+
+  setMode = (m) => this.setState({mode: m});
+  goRegistro = () => this.setState({studentScreen: 'registro'});
+  backToAuth = () => this.setState({studentScreen: 'auth'});
+  updateRegistro = (field, value) => this.setState(s => ({registro: {...s.registro, [field]: value}}));
+  submitRegistro = () => this.setState({studentScreen: 'app', appTab: 'feed'});
+  setTab = (t) => this.setState({appTab: t, selectedVacanteId: null});
+  openVacante = (id) => this.setState({selectedVacanteId: id});
+  closeVacante = () => this.setState({selectedVacanteId: null});
+  postular = () => {
+    const id = this.state.selectedVacanteId;
+    if (id == null) return;
+    if (this.state.postulaciones.some(p => p.vacanteId === id)) return;
+    this.setState(s => ({postulaciones: [...s.postulaciones, {vacanteId: id, estado: 'enviada', fecha: 'hoy'}]}));
+  };
+  markNotifRead = (id) => this.setState(s => ({notifLeidas: {...s.notifLeidas, [id]: true}}));
+  openNotifTarget = (n) => {
+    this.markNotifRead(n.id);
+    if (n.tipo === 'vacante') this.setState({appTab: 'feed', selectedVacanteId: n.vacanteId});
+    else this.setState({appTab: 'postulaciones'});
+  };
+  logout = () => this.setState({studentScreen: 'auth', appTab: 'feed', selectedVacanteId: null});
+  setModTab = (t) => this.setState({moderatorTab: t, moderatorSelectedId: null});
+  openReview = (id) => this.setState({moderatorSelectedId: id});
+  closeReview = () => this.setState({moderatorSelectedId: null});
+  resolveReview = (estado) => {
+    const id = this.state.moderatorSelectedId;
+    this.setState(s => ({
+      queue: s.queue.map(q => q.id === id ? {...q, estado} : q),
+      moderatorSelectedId: null,
+    }));
+  };
+
+  goEmpresa = () => this.setState({mode: 'empresa', empresaScreen: 'registro'});
+  goReferidor = () => this.setState({mode: 'referidor', referidorScreen: 'registro'});
+  goHome = () => this.setState({mode: 'estudiante', studentScreen: 'auth'});
+  updateEmpresaForm = (field, value) => this.setState(s => ({empresaForm: {...s.empresaForm, [field]: value}}));
+  updateEmpresaVacanteForm = (field, value) => this.setState(s => ({empresaVacanteForm: {...s.empresaVacanteForm, [field]: value}}));
+  irAPublicarEmpresa = () => this.setState({empresaScreen: 'publicar'});
+  volverARegistroEmpresa = () => this.setState({empresaScreen: 'registro'});
+  publicarVacanteEmpresa = () => {
+    const ef = this.state.empresaForm, f = this.state.empresaVacanteForm;
+    const vId = this.state.nextId, qId = this.state.nextId + 1;
+    const nuevaVacante = {
+      id: vId, tipo: 'empresa', empresa: ef.nombreEmpresa || 'Empresa sin nombre',
+      puesto: f.puesto || 'Puesto sin título', carreras: [f.carrera], semestreMin: Number(f.semestreMin),
+      modalidad: f.modalidad, contrato: f.contrato, ubicacion: f.ubicacion || 'No especificada',
+      fecha: 'hoy', descripcion: f.descripcion || '',
+      requisitos: (f.requisitos || '').split('\n').map(x => x.trim()).filter(Boolean),
+      queueId: qId,
+    };
+    const nuevoItem = {
+      id: qId, tipo: 'empresa', nombre: `${ef.nombreEmpresa || 'Empresa'} — ${f.puesto || 'nueva vacante'}`,
+      meta: ef.correo || '', detalle: `Nueva vacante propuesta: ${f.puesto || ''}. ${f.descripcion || ''}`.trim(),
+      fecha: 'hoy', estado: 'pendiente',
+    };
+    this.setState(s => ({
+      vacantesExtra: [...s.vacantesExtra, nuevaVacante],
+      queue: [nuevoItem, ...s.queue],
+      nextId: s.nextId + 2,
+      empresaScreen: 'listo',
+    }));
+  };
+  updateReferidorForm = (field, value) => this.setState(s => ({referidorForm: {...s.referidorForm, [field]: value}}));
+  updateReferidoPostForm = (field, value) => this.setState(s => ({referidoPostForm: {...s.referidoPostForm, [field]: value}}));
+  irAPublicarReferido = () => this.setState({referidorScreen: 'publicar'});
+  volverARegistroReferido = () => this.setState({referidorScreen: 'registro'});
+  publicarVacanteReferido = () => {
+    const rf = this.state.referidorForm, f = this.state.referidoPostForm;
+    const vId = this.state.nextId, qId = this.state.nextId + 1;
+    const nuevaVacante = {
+      id: vId, tipo: 'referido', empresa: f.empresa || 'Empresa sin nombre', puesto: f.puesto || 'Puesto sin título',
+      carreras: [f.carrera], semestreMin: Number(f.semestreMin), modalidad: f.modalidad, contrato: f.contrato,
+      ubicacion: f.ubicacion || 'No especificada', fecha: 'hoy',
+      referidor: rf.nombre || 'Alguien de tu comunidad', notaReferido: f.nota || '',
+      queueId: qId,
+    };
+    const nuevoItem = {
+      id: qId, tipo: 'contenido', nombre: `Publicación de referido — "${f.puesto || 'sin título'}"`,
+      meta: `${rf.nombre || ''} · ${rf.correo || ''}`, detalle: f.nota || '', fecha: 'hoy', estado: 'pendiente',
+    };
+    this.setState(s => ({
+      vacantesExtra: [...s.vacantesExtra, nuevaVacante],
+      queue: [nuevoItem, ...s.queue],
+      nextId: s.nextId + 2,
+      referidorScreen: 'listo',
+    }));
+  };
+
+  estadoTag(estado) {
+    if (estado === 'enviada') return 'tag tag-outline';
+    if (estado === 'en revisión') return 'tag tag-accent-2';
+    if (estado === 'aceptada') return 'tag tag-accent';
+    return 'tag tag-neutral';
+  }
+  modEstadoTag(estado) {
+    if (estado === 'pendiente') return 'tag tag-accent-2';
+    if (estado === 'aprobado') return 'tag tag-accent';
+    return 'tag tag-neutral';
+  }
+  initials(name) {
+    return (name || '').trim().split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('') || '—';
+  }
+
+  renderVals() {
+    const s = this.state;
+    const showNotes = this.props.showAssumptionNotes !== false;
+
+    const approvedExtra = s.vacantesExtra.filter(v => {
+      const q = s.queue.find(qq => qq.id === v.queueId);
+      return q && q.estado === 'aprobado';
+    });
+    const allVacantes = [...VACANTES, ...approvedExtra];
+
+    const vacanteRaw = allVacantes.find(v => v.id === s.selectedVacanteId) || null;
+    const yaPostulado = vacanteRaw ? s.postulaciones.some(p => p.vacanteId === vacanteRaw.id) : false;
+    const vacante = vacanteRaw ? {
+      ...vacanteRaw,
+      esEmpresa: vacanteRaw.tipo === 'empresa',
+      esReferido: vacanteRaw.tipo === 'referido',
+      carrerasTxt: vacanteRaw.carreras.join(' · '),
+      requisitos: vacanteRaw.requisitos || [],
+      notaReferido: vacanteRaw.notaReferido || '',
+      inicial: vacanteRaw.tipo === 'empresa' ? this.initials(vacanteRaw.empresa) : this.initials(vacanteRaw.referidor),
+    } : {esEmpresa: false, esReferido: false, carreras: [], carrerasTxt: '', requisitos: [], notaReferido: '', inicial: ''};
+
+    const filtered = allVacantes.filter(v =>
+      (s.filterCarrera === 'todas' || v.carreras.includes(s.filterCarrera)) &&
+      (s.filterSemestre === 0 || v.semestreMin <= s.filterSemestre) &&
+      (s.filterContrato === 'todos' || v.contrato === s.filterContrato)
+    ).map(v => ({
+      ...v,
+      esEmpresa: v.tipo === 'empresa',
+      esReferido: v.tipo === 'referido',
+      inicial: v.tipo === 'empresa' ? this.initials(v.empresa) : this.initials(v.referidor),
+      onOpen: () => this.openVacante(v.id),
+    }));
+
+    const postulacionesList = s.postulaciones.map(p => {
+      const v = allVacantes.find(vv => vv.id === p.vacanteId);
+      return {...p, puesto: v ? v.puesto : '', empresa: v ? v.empresa : '', tagClass: this.estadoTag(p.estado)};
+    }).slice().reverse();
+
+    const notifList = NOTIFICACIONES.map(n => {
+      const leida = n.leida || !!s.notifLeidas[n.id];
+      return {...n, leida, dotColor: leida ? 'transparent' : 'var(--color-accent)', onOpen: () => this.openNotifTarget(n)};
+    });
+    const notifPend = notifList.filter(n => !n.leida).length;
+
+    const creditosTotal = 220;
+    const creditosPct = Math.min(100, Math.round((s.registro.creditos / creditosTotal) * 100));
+    const iniciales = this.initials(s.registro.nombre);
+
+    const queuePendiente = s.queue.filter(q => q.estado === 'pendiente').map(q => ({
+      ...q, tipoLabel: q.tipo === 'empresa' ? 'Empresa' : 'Contenido',
+      tagClass: this.modEstadoTag(q.estado), onReview: () => this.openReview(q.id),
+    }));
+    const queueHistorial = s.queue.filter(q => q.estado !== 'pendiente').map(q => ({
+      ...q, tipoLabel: q.tipo === 'empresa' ? 'Empresa' : 'Contenido',
+      tagClass: this.modEstadoTag(q.estado),
+    }));
+    const modSelectedRaw = s.queue.find(q => q.id === s.moderatorSelectedId) || null;
+    const modSelected = modSelectedRaw ? {...modSelectedRaw, tipoLabel: modSelectedRaw.tipo === 'empresa' ? 'Empresa' : 'Contenido'} : {tipoLabel: '', nombre: '', meta: '', detalle: ''};
+
+    return {
+      mode: s.mode, isEstudiante: s.mode === 'estudiante', isModerador: s.mode === 'moderador',
+      isEmpresaFlow: s.mode === 'empresa', isReferidorFlow: s.mode === 'referidor',
+      setModeEstudiante: () => this.setMode('estudiante'), setModeModerador: () => this.setMode('moderador'),
+      goEmpresa: this.goEmpresa, goReferidor: this.goReferidor, goHome: this.goHome,
+      empIsRegistro: s.empresaScreen === 'registro', empIsPublicar: s.empresaScreen === 'publicar', empIsListo: s.empresaScreen === 'listo',
+      empresaForm: s.empresaForm, empresaVacanteForm: s.empresaVacanteForm,
+      updateEmpresaNombre: (e) => this.updateEmpresaForm('nombreEmpresa', e.target.value),
+      updateEmpresaCorreo: (e) => this.updateEmpresaForm('correo', e.target.value),
+      updateEmpresaSector: (e) => this.updateEmpresaForm('sector', e.target.value),
+      updateEmpresaSitio: (e) => this.updateEmpresaForm('sitio', e.target.value),
+      irAPublicarEmpresa: this.irAPublicarEmpresa, volverARegistroEmpresa: this.volverARegistroEmpresa,
+      updateEVPuesto: (e) => this.updateEmpresaVacanteForm('puesto', e.target.value),
+      updateEVCarrera: (e) => this.updateEmpresaVacanteForm('carrera', e.target.value),
+      updateEVSemestre: (e) => this.updateEmpresaVacanteForm('semestreMin', Number(e.target.value)),
+      updateEVModalidad: (e) => this.updateEmpresaVacanteForm('modalidad', e.target.value),
+      updateEVContrato: (e) => this.updateEmpresaVacanteForm('contrato', e.target.value),
+      updateEVUbicacion: (e) => this.updateEmpresaVacanteForm('ubicacion', e.target.value),
+      updateEVDescripcion: (e) => this.updateEmpresaVacanteForm('descripcion', e.target.value),
+      updateEVRequisitos: (e) => this.updateEmpresaVacanteForm('requisitos', e.target.value),
+      publicarVacanteEmpresa: this.publicarVacanteEmpresa,
+      refIsRegistro: s.referidorScreen === 'registro', refIsPublicar: s.referidorScreen === 'publicar', refIsListo: s.referidorScreen === 'listo',
+      referidorForm: s.referidorForm, referidoPostForm: s.referidoPostForm,
+      updateRefNombre: (e) => this.updateReferidorForm('nombre', e.target.value),
+      updateRefCorreo: (e) => this.updateReferidorForm('correo', e.target.value),
+      updateRefCarreraPropia: (e) => this.updateReferidorForm('carrera', e.target.value),
+      irAPublicarReferido: this.irAPublicarReferido, volverARegistroReferido: this.volverARegistroReferido,
+      updateRPPuesto: (e) => this.updateReferidoPostForm('puesto', e.target.value),
+      updateRPEmpresa: (e) => this.updateReferidoPostForm('empresa', e.target.value),
+      updateRPCarrera: (e) => this.updateReferidoPostForm('carrera', e.target.value),
+      updateRPSemestre: (e) => this.updateReferidoPostForm('semestreMin', Number(e.target.value)),
+      updateRPModalidad: (e) => this.updateReferidoPostForm('modalidad', e.target.value),
+      updateRPContrato: (e) => this.updateReferidoPostForm('contrato', e.target.value),
+      updateRPUbicacion: (e) => this.updateReferidoPostForm('ubicacion', e.target.value),
+      updateRPNota: (e) => this.updateReferidoPostForm('nota', e.target.value),
+      updateRPLink: (e) => this.updateReferidoPostForm('linkOficial', e.target.value),
+      publicarVacanteReferido: this.publicarVacanteReferido,
+      showNotes,
+      isAuth: s.studentScreen === 'auth', isRegistro: s.studentScreen === 'registro', isApp: s.studentScreen === 'app',
+      goRegistro: this.goRegistro, backToAuth: this.backToAuth,
+      registro: {...s.registro, estadoActivo: s.registro.estado === 'Activo', estadoEPS: s.registro.estado === 'EPS/Práctica', estadoGraduado: s.registro.estado === 'Graduado'},
+      carreraOptions: CARRERAS.map(c => ({value: c})),
+      semestreOptions: Array.from({length: 10}, (_, i) => ({value: i + 1})),
+      updateNombre: (e) => this.updateRegistro('nombre', e.target.value),
+      updateCarrera: (e) => this.updateRegistro('carrera', e.target.value),
+      updateSemestre: (e) => this.updateRegistro('semestre', Number(e.target.value)),
+      updateCreditos: (e) => this.updateRegistro('creditos', Number(e.target.value)),
+      updateEstado: (e) => this.updateRegistro('estado', e.target.value),
+      updateCorreo: (e) => this.updateRegistro('correo', e.target.value),
+      updatePassword: (e) => this.updateRegistro('password', e.target.value),
+      updateTelefono: (e) => this.updateRegistro('telefono', e.target.value),
+      updateBio: (e) => this.updateRegistro('bio', e.target.value),
+      submitRegistro: this.submitRegistro,
+      appTab: s.appTab, tabFeed: s.appTab === 'feed', tabPostulaciones: s.appTab === 'postulaciones', tabNotif: s.appTab === 'notificaciones', tabPerfil: s.appTab === 'perfil',
+      setTabFeed: () => this.setTab('feed'), setTabPostulaciones: () => this.setTab('postulaciones'), setTabNotif: () => this.setTab('notificaciones'), setTabPerfil: () => this.setTab('perfil'),
+      feedColor: s.appTab === 'feed' ? 'var(--color-accent)' : 'var(--color-text)',
+      postColor: s.appTab === 'postulaciones' ? 'var(--color-accent)' : 'var(--color-text)',
+      notifColor: s.appTab === 'notificaciones' ? 'var(--color-accent)' : 'var(--color-text)',
+      perfilColor: s.appTab === 'perfil' ? 'var(--color-accent)' : 'var(--color-text)',
+      notifPendCount: notifPend, notifBadge: notifPend > 0,
+      filterCarrera: s.filterCarrera, filterSemestre: s.filterSemestre, filterContrato: s.filterContrato,
+      onFilterCarrera: (e) => this.setState({filterCarrera: e.target.value}),
+      onFilterSemestre: (e) => this.setState({filterSemestre: Number(e.target.value)}),
+      onFilterContrato: (e) => this.setState({filterContrato: e.target.value}),
+      filteredVacantes: filtered, filteredEmpty: filtered.length === 0, filteredCount: filtered.length,
+      showingDetail: !!vacanteRaw, notShowingDetail: !vacanteRaw,
+      vacante, yaPostulado, notYaPostulado: !!vacanteRaw && !yaPostulado,
+      postular: this.postular, closeVacante: this.closeVacante,
+      postulacionesList, postulacionesEmpty: postulacionesList.length === 0,
+      notifList, notifEmpty: notifList.length === 0,
+      perfil: {...s.registro, creditosTotal, creditosPct, iniciales},
+      logout: this.logout,
+      moderatorTab: s.moderatorTab, modTabCola: s.moderatorTab === 'cola', modTabHistorial: s.moderatorTab === 'historial',
+      setModTabCola: () => this.setModTab('cola'), setModTabHistorial: () => this.setModTab('historial'),
+      modColaColor: s.moderatorTab === 'cola' ? 'var(--color-accent)' : 'inherit',
+      modHistColor: s.moderatorTab === 'historial' ? 'var(--color-accent)' : 'inherit',
+      queuePendiente, queuePendienteEmpty: queuePendiente.length === 0,
+      queueHistorial, queueHistorialEmpty: queueHistorial.length === 0,
+      modSelected, modShowDialog: !!modSelectedRaw,
+      closeReview: this.closeReview,
+      stopClick: (e) => e.stopPropagation(),
+      approveSelected: () => this.resolveReview('aprobado'),
+      rejectSelected: () => this.resolveReview('rechazado'),
+    };
+  }
+}
+</script>
+</body>
+</html>
