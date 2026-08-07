@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Plataforma de Empleo USAC</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .hero { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-10) var(--space-4); text-align: center; gap: var(--space-6); }
+    .hero-tag { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-accent); opacity: 0.8; }
+    .hero-title { font-family: var(--font-heading); font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 700; line-height: 1.1; max-width: 680px; }
+    .hero-sub { font-size: 16px; max-width: 480px; opacity: 0.75; line-height: 1.6; }
+    .roles-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4); max-width: 860px; width: 100%; padding: 0 var(--space-4); }
+    .role-card { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-5); cursor: pointer; text-decoration: none; color: inherit; transition: transform 0.15s ease; }
+    .role-card:hover { transform: translateY(-2px); }
+    .role-icon { font-size: 24px; margin-bottom: var(--space-1); }
+    .role-label { font-family: var(--font-heading); font-weight: 700; font-size: 15px; text-transform: uppercase; letter-spacing: 0.06em; }
+    .role-desc { font-size: 13px; opacity: 0.7; line-height: 1.5; }
+    .cta-row { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; justify-content: center; }
+    .divider-text { font-size: 13px; opacity: 0.5; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <span class="nav-brand">Empleo USAC · FIUSAC</span>
+    <div style="display:flex; gap:var(--space-3);">
+      <a href="/login.html" class="btn btn-ghost" style="font-size:14px;">Iniciar sesión</a>
+    </div>
+  </nav>
+
+  <main class="hero">
+    <p class="hero-tag">Facultad de Ingeniería · USAC</p>
+    <h1 class="hero-title">La bolsa de trabajo de tu comunidad académica</h1>
+    <p class="hero-sub">Vacantes filtradas por carrera, semestre y perfil real. Conectamos estudiantes y egresados de Ingeniería con empresas que entienden lo que estudias.</p>
+
+    <div class="cta-row">
+      <a href="/login.html" class="btn btn-primary">Iniciar sesión</a>
+      <span class="divider-text">o regístrate como</span>
+    </div>
+
+    <div class="roles-grid">
+      <a href="/pages/registro/estudiante.html" class="card blueprint role-card">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="role-icon">🎓</div>
+        <div class="role-label">Estudiante / Egresado</div>
+        <div class="role-desc">Busca vacantes compatibles con tu carrera y semestre. Postula con tu perfil académico real.</div>
+      </a>
+
+      <a href="/pages/registro/empresa.html" class="card blueprint role-card">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="role-icon">🏢</div>
+        <div class="role-label">Empresa</div>
+        <div class="role-desc">Publica vacantes dirigidas a candidatos verificados de la Facultad de Ingeniería.</div>
+      </a>
+
+      <a href="/pages/registro/referidor.html" class="card blueprint role-card">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="role-icon">🤝</div>
+        <div class="role-label">Referidor</div>
+        <div class="role-desc">¿Dejas un puesto? Recomienda a alguien de tu misma carrera y comunidad.</div>
+      </a>
+
+      <a href="/pages/registro/moderador.html" class="card blueprint role-card" style="opacity:0.6; pointer-events:none;">
+        <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+        <div class="role-icon">🛡️</div>
+        <div class="role-label">Moderador</div>
+        <div class="role-desc">Acceso solo por invitación. Gestiona la cola de verificación de vacantes.</div>
+      </a>
+    </div>
+  </main>
+
+  <footer style="text-align:center; padding:var(--space-6); opacity:0.4; font-size:13px;">
+    Facultad de Ingeniería · Universidad de San Carlos de Guatemala
+  </footer>
+
+  <script type="module">
+    import { auth } from "/js/auth.js";
+    // Si ya está logueado, redirigir al dashboard
+    if (auth.isLoggedIn()) auth.redirectToDashboard();
+  </script>
+</body>
+</html>
