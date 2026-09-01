@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalle de vacante</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 680px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-5); }
+    .back-link { font-size: 13px; opacity: 0.6; text-decoration: none; display: inline-flex; align-items: center; gap: var(--space-1); }
+    .back-link:hover { opacity: 1; }
+    .vacante-header { display: flex; flex-direction: column; gap: var(--space-2); }
+    .vacante-puesto { font-family: var(--font-heading); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; line-height: 1.1; }
+    .vacante-empresa { font-size: 15px; opacity: 0.7; }
+    .tags-row { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .section-label { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.5; margin-bottom: var(--space-2); }
+    .detail-block { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); }
+    .detail-text { font-size: 14px; line-height: 1.7; white-space: pre-wrap; }
+    .nota-ref { font-style: italic; font-size: 14px; opacity: 0.8; border-left: 2px solid var(--color-accent-2); padding-left: var(--space-4); line-height: 1.6; }
+    .meta-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .meta-item { display: flex; flex-direction: column; gap: 2px; }
+    .meta-key { font-size: 11px; opacity: 0.45; text-transform: uppercase; letter-spacing: 0.08em; font-family: var(--font-heading); }
+    .meta-val { font-size: 14px; }
+    .action-bar { position: sticky; bottom: 0; background: var(--color-bg); border-top: 1px solid var(--color-neutral-200); padding: var(--space-4) var(--space-6); display: flex; gap: var(--space-3); align-items: center; justify-content: flex-end; }
+    .spinner { text-align: center; padding: var(--space-10); opacity: 0.4; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/pages/estudiante/home.html" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+  </nav>
+
+  <main class="page" id="main">
+    <div class="spinner">Cargando vacante...</div>
+  </main>
+
+  <div class="action-bar" id="actionBar" hidden>
+    <a href="/pages/estudiante/vacantes.html" class="btn btn-ghost">← Volver al feed</a>
+    <button class="btn btn-primary" id="postularBtn">Postular a esta vacante</button>
+  </div>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    auth.requireAuth(["estudiante"]);
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    const id = new URLSearchParams(location.search).get("id");
+    if (!id) { window.location.href = "/pages/estudiante/vacantes.html"; }
+
+    const CONTRATO_LABELS = { tiempo_completo: "Tiempo completo", medio_tiempo: "Medio tiempo", practica: "Práctica", freelance: "Freelance" };
+    const MODALIDAD_LABELS = { presencial: "Presencial", remoto: "Remoto", hibrido: "Híbrido" };
+
+    async function cargar() {
+      try {
+        const v = await api.getVacante(id);
+        const esRef = v.tipo === "referido";
+
+        document.title = `${v.puesto} — ${v.empresa_nombre}`;
+
+        const main = document.getElementById("main");
+        main.innerHTML = `
+          <a href="/pages/estudiante/vacantes.html" class="back-link">← Volver a vacantes</a>
+
+          <div class="vacante-header">
+            <div style="display:flex; gap:var(--space-2); flex-wrap:wrap;">
+              <span class="tag ${esRef ? 'tag-accent-2' : 'tag-accent'}">${esRef ? 'Referido' : 'Empresa'}</span>
+              ${v.solo_plataforma ? '<span class="tag tag-accent" style="font-size:10px;">Solo plataforma</span>' : ''}
+            </div>
+            <div class="vacante-puesto">${v.puesto}</div>
+            <div class="vacante-empresa">${v.empresa_nombre}${v.ubicacion ? ' · ' + v.ubicacion : ''}</div>
+            <div class="tags-row">
+              <span class="tag tag-neutral">${CONTRATO_LABELS[v.tipo_contrato] || v.tipo_contrato}</span>
+              <span class="tag tag-neutral">${MODALIDAD_LABELS[v.modalidad] || v.modalidad}</span>
+              <span class="tag tag-neutral">Desde semestre ${v.semestre_minimo}</span>
+            </div>
+          </div>
+
+          <div class="meta-grid">
+            <div class="meta-item"><span class="meta-key">Carrera compatible</span><span class="meta-val">${v.carrera_compatible}</span></div>
+            <div class="meta-item"><span class="meta-key">Publicado</span><span class="meta-val">${v.created_at ? new Date(v.created_at).toLocaleDateString('es-GT') : '—'}</span></div>
+            ${v.exclusiva_hasta ? `<div class="meta-item"><span class="meta-key">Exclusiva hasta</span><span class="meta-val">${new Date(v.exclusiva_hasta).toLocaleDateString('es-GT')}</span></div>` : ''}
+          </div>
+
+          ${esRef && v.nota_personal ? `
+            <div class="card detail-block" style="border:1px dashed color-mix(in oklch, var(--color-accent-2) 50%, transparent);">
+              <p class="section-label">Nota del referidor</p>
+              <p class="nota-ref">"${v.nota_personal}"</p>
+            </div>` : ''}
+
+          <div class="card blueprint detail-block">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <p class="section-label">Descripción del puesto</p>
+            <p class="detail-text">${v.descripcion}</p>
+          </div>
+
+          ${v.requisitos ? `
+            <div class="card detail-block" style="border:1px solid var(--color-neutral-200);">
+              <p class="section-label">Requisitos</p>
+              <p class="detail-text">${v.requisitos}</p>
+            </div>` : ''}
+
+          ${esRef && v.enlace_oficial ? `
+            <a href="${v.enlace_oficial}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost" style="align-self:flex-start;">
+              Ver postulación oficial →
+            </a>` : ''}
+        `;
+
+        document.getElementById("actionBar").hidden = false;
+        document.getElementById("postularBtn").dataset.vacanteId = v.id;
+
+      } catch (err) {
+        document.getElementById("main").innerHTML = `
+          <a href="/pages/estudiante/vacantes.html" class="back-link">← Volver a vacantes</a>
+          <p style="opacity:0.5; font-size:14px;">No se pudo cargar la vacante. ${err.message}</p>`;
+      }
+    }
+
+    cargar();
+
+    document.getElementById("postularBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("postularBtn");
+      const vacanteId = btn.dataset.vacanteId;
+      if (!vacanteId) return;
+
+      btn.disabled = true;
+      btn.textContent = "Postulando...";
+
+      try {
+        await api.postular(Number(vacanteId));
+        btn.textContent = "✓ Postulación enviada";
+        btn.classList.remove("btn-primary");
+        btn.classList.add("btn-ghost");
+      } catch (err) {
+        if (err.message.includes("Ya postulaste")) {
+          btn.textContent = "Ya aplicaste a esta vacante";
+          btn.classList.remove("btn-primary");
+          btn.classList.add("btn-ghost");
+        } else {
+          alert("Error al postular: " + err.message);
+          btn.disabled = false;
+          btn.textContent = "Postular a esta vacante";
+        }
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inicio — Moderador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 860px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .welcome-title { font-family: var(--font-heading); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; }
+    .actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); }
+    .action-card { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-5); text-decoration: none; color: inherit; transition: transform 0.15s ease; }
+    .action-card:hover { transform: translateY(-2px); }
+    .action-icon { font-size: 28px; }
+    .action-label { font-family: var(--font-heading); font-weight: 700; font-size: 15px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .action-desc { font-size: 13px; opacity: 0.6; line-height: 1.5; }
+    .section-label { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.5; }
+    .stat-row { display: flex; gap: var(--space-4); flex-wrap: wrap; }
+    .stat-card { padding: var(--space-4) var(--space-5); display: flex; flex-direction: column; gap: var(--space-1); min-width: 140px; }
+    .stat-num { font-family: var(--font-heading); font-size: 32px; font-weight: 700; color: var(--color-accent); }
+    .stat-label { font-size: 12px; opacity: 0.6; text-transform: uppercase; letter-spacing: 0.08em; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <div style="display:flex; gap:var(--space-3); align-items:center;">
+      <span class="tag tag-accent-2">Moderador</span>
+      <span style="font-size:14px; opacity:0.7;" id="userName"></span>
+      <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+    </div>
+  </nav>
+
+  <main class="page">
+    <div>
+      <p class="section-label">Panel de moderación</p>
+      <h1 class="welcome-title" id="welcomeMsg">Centro de control</h1>
+    </div>
+
+    <div class="stat-row">
+      <div class="card stat-card">
+        <div class="stat-num" id="colaCount">—</div>
+        <div class="stat-label">Vacantes en cola</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-num" id="certCount">—</div>
+        <div class="stat-label">Certs. pendientes</div>
+      </div>
+      <div class="card stat-card">
+        <div class="stat-num" id="historialCount">—</div>
+        <div class="stat-label">Procesadas</div>
+      </div>
+    </div>
+
+    <div>
+      <p class="section-label" style="margin-bottom:var(--space-4);">Acciones</p>
+      <div class="actions-grid">
+        <a href="/pages/moderador/cola.html" class="card blueprint action-card">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div class="action-icon">⏳</div>
+          <div class="action-label">Cola de verificación</div>
+          <div class="action-desc">Revisa y aprueba o rechaza las vacantes pendientes.</div>
+        </a>
+
+        <a href="/pages/moderador/certificaciones.html" class="card action-card" style="border:1px solid var(--color-neutral-200);">
+          <div class="action-icon">🎓</div>
+          <div class="action-label">Certificaciones</div>
+          <div class="action-desc">Verifica certificaciones pendientes de estudiantes.</div>
+        </a>
+
+        <a href="/pages/moderador/historial.html" class="card action-card" style="border:1px solid var(--color-neutral-200);">
+          <div class="action-icon">📁</div>
+          <div class="action-label">Historial</div>
+          <div class="action-desc">Consulta vacantes ya procesadas y sus motivos.</div>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    const user = auth.requireAuth(["moderador"]);
+    if (!user) throw new Error("No auth");
+
+    document.getElementById("welcomeMsg").textContent = `Hola, ${user.nombre}`;
+    document.getElementById("userName").textContent = user.nombre;
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    // Cargar contadores
+    Promise.all([api.getCola(), api.getHistorial(), api.certsPendientes()]).then(([cola, historial, certs]) => {
+      document.getElementById("colaCount").textContent = cola.length;
+      document.getElementById("historialCount").textContent = historial.length;
+      document.getElementById("certCount").textContent = certs.length;
+    }).catch(() => {});
+  </script>
+</body>
+</html>

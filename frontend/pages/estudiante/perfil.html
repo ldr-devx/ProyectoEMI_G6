@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi perfil — Estudiante</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 680px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .section-label { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.5; margin-bottom: var(--space-3); }
+    .profile-header { display: flex; align-items: flex-start; gap: var(--space-4); flex-wrap: wrap; }
+    .avatar { width: 56px; height: 56px; border-radius: 50%; background: var(--color-accent); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 22px; font-weight: 700; color: var(--color-bg); flex-shrink: 0; }
+    .profile-name { font-family: var(--font-heading); font-size: 24px; font-weight: 700; }
+    .profile-meta { font-size: 13px; opacity: 0.6; }
+    .credits-bar-wrap { display: flex; flex-direction: column; gap: var(--space-2); }
+    .credits-bar-track { height: 4px; background: var(--color-neutral-200); border-radius: 2px; }
+    .credits-bar-fill { height: 100%; background: var(--color-accent); border-radius: 2px; transition: width 0.4s ease; }
+    .credits-label { font-size: 12px; opacity: 0.55; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .profile-section { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-5); }
+    .btn-row { display: flex; gap: var(--space-3); justify-content: flex-end; }
+    #saveMsg { font-size: 13px; color: var(--color-accent); display: none; }
+    #errorMsg { font-size: 13px; color: var(--color-error, #f87171); display: none; }
+    .cert-row { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border-bottom: 1px solid var(--color-neutral-200); flex-wrap: wrap; }
+    .cert-row:last-child { border-bottom: none; }
+    .cert-info { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+    .cert-nombre { font-size: 14px; font-weight: 600; }
+    .cert-meta { font-size: 12px; opacity: 0.55; }
+    .badge-cert-pendiente { background: color-mix(in oklch, var(--color-accent-2) 20%, transparent); color: var(--color-accent-2); }
+    .badge-cert-verificada { background: color-mix(in oklch, var(--color-accent) 20%, transparent); color: var(--color-accent); }
+    .badge-cert-rechazada { background: color-mix(in oklch, #f87171 20%, transparent); color: #f87171; }
+    .cert-form { display: none; flex-direction: column; gap: var(--space-3); padding: var(--space-4); border-top: 1px solid var(--color-neutral-200); }
+    .cert-form.open { display: flex; }
+    .field-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: var(--space-3); }
+    .skeleton { background: var(--color-neutral-200); border-radius: 4px; animation: pulse 1.5s ease-in-out infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/pages/estudiante/home.html" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <div style="display:flex; gap:var(--space-3); align-items:center;">
+      <span class="tag tag-accent" id="nivelBadge"></span>
+      <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+    </div>
+  </nav>
+
+  <main class="page">
+    <!-- Encabezado -->
+    <div class="profile-header">
+      <div class="avatar" id="avatar">—</div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:var(--space-1);">
+        <div class="profile-name" id="profileName">Cargando...</div>
+        <div class="profile-meta" id="profileMeta"></div>
+        <div style="margin-top:var(--space-3);" class="credits-bar-wrap" id="creditsSection" hidden>
+          <div class="credits-bar-track">
+            <div class="credits-bar-fill" id="creditsBar" style="width:0%"></div>
+          </div>
+          <span class="credits-label" id="creditsLabel"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos académicos -->
+    <div class="card blueprint profile-section">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <p class="section-label">Datos académicos</p>
+
+      <div class="field">
+        <label class="label">Carrera</label>
+        <select id="carrera" class="input">
+          <option value="">Sin especificar</option>
+          <option value="Ingeniería en Ciencias y Sistemas">Ingeniería en Ciencias y Sistemas</option>
+          <option value="Ingeniería Civil">Ingeniería Civil</option>
+          <option value="Ingeniería Mecánica">Ingeniería Mecánica</option>
+          <option value="Ingeniería Eléctrica">Ingeniería Eléctrica</option>
+          <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+          <option value="Ingeniería Química">Ingeniería Química</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="label">Semestre actual</label>
+          <input type="number" id="semestre" class="input" min="1" max="12" placeholder="Ej. 6" />
+        </div>
+        <div class="field">
+          <label class="label">Créditos aprobados</label>
+          <input type="number" id="creditos_aprobados" class="input" min="0" max="264" placeholder="Ej. 120" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Estado académico</label>
+        <select id="estado_academico" class="input">
+          <option value="activo">Estudiante activo</option>
+          <option value="eps">En EPS / Práctica supervisada</option>
+          <option value="graduado">Graduado / Egresado</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Datos personales -->
+    <div class="card profile-section" style="border:1px solid var(--color-neutral-200);">
+      <p class="section-label">Datos personales</p>
+
+      <div class="field">
+        <label class="label">Nombre completo</label>
+        <input type="text" id="nombre" class="input" placeholder="Tu nombre completo" />
+      </div>
+
+      <div class="field">
+        <label class="label">Bio (opcional)</label>
+        <textarea id="bio" class="input" rows="3" placeholder="Cuéntale a los empleadores quién eres en pocas palabras..." style="resize:vertical;"></textarea>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="label">Teléfono (opcional)</label>
+          <input type="tel" id="telefono" class="input" placeholder="+502 5555 5555" />
+        </div>
+        <div class="field">
+          <label class="label">Estado académico</label>
+          <span class="input" id="emailDisplay" style="opacity:0.5; cursor:default; user-select:none;"></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Portafolio -->
+    <div class="card profile-section" style="border:1px solid var(--color-neutral-200);">
+      <p class="section-label">Portafolio y enlaces</p>
+
+      <div class="field">
+        <label class="label">GitHub</label>
+        <input type="url" id="github_url" class="input" placeholder="https://github.com/tuusuario" />
+      </div>
+      <div class="field">
+        <label class="label">CV / Portafolio (URL)</label>
+        <input type="url" id="cv_url" class="input" placeholder="https://drive.google.com/..." />
+      </div>
+    </div>
+
+    <!-- Certificaciones -->
+    <div class="card profile-section" style="border:1px solid var(--color-neutral-200); gap:0; padding:0; overflow:hidden;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:var(--space-4) var(--space-5);">
+        <p class="section-label" style="margin:0;">Certificaciones</p>
+        <button class="btn btn-ghost" id="toggleCertForm" style="font-size:13px;">+ Agregar</button>
+      </div>
+
+      <div class="cert-form" id="certForm">
+        <div class="field">
+          <label class="label">Nombre de la certificación *</label>
+          <input type="text" id="certNombre" class="input" placeholder="Ej. Python para Ciencia de Datos" />
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="label">Entidad emisora *</label>
+            <input type="text" id="certEntidad" class="input" placeholder="Ej. Coursera, Google, etc." />
+          </div>
+          <div class="field">
+            <label class="label">Tipo *</label>
+            <select id="certTipo" class="input">
+              <option value="afiliado">Afiliado externo</option>
+              <option value="propia">Certificación de plataforma</option>
+            </select>
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label class="label">Fecha de obtención</label>
+            <input type="date" id="certFecha" class="input" />
+          </div>
+          <div class="field">
+            <label class="label">URL de verificación</label>
+            <input type="url" id="certUrl" class="input" placeholder="https://..." />
+          </div>
+        </div>
+        <div style="display:flex; gap:var(--space-2); justify-content:flex-end;">
+          <button class="btn btn-ghost" id="cancelCert" style="font-size:13px;">Cancelar</button>
+          <button class="btn btn-primary" id="guardarCert" style="font-size:13px;">Guardar certificación</button>
+        </div>
+      </div>
+
+      <div id="certList" style="padding:var(--space-2) 0;">
+        <p style="padding:var(--space-3) var(--space-5); font-size:13px; opacity:0.45; font-style:italic;">Cargando certificaciones...</p>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <span id="saveMsg">✓ Perfil actualizado</span>
+      <span id="errorMsg"></span>
+      <button class="btn btn-primary" id="saveBtn">Guardar cambios</button>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    const user = auth.requireAuth(["estudiante"]);
+    if (!user) throw new Error("No auth");
+
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    const TOTAL_CREDITOS = 264;
+
+    function updateCreditsBar(creditos) {
+      const pct = Math.min(100, Math.round(((creditos || 0) / TOTAL_CREDITOS) * 100));
+      document.getElementById("creditsBar").style.width = pct + "%";
+      document.getElementById("creditsLabel").textContent = `${creditos || 0} / ${TOTAL_CREDITOS} créditos (${pct}%)`;
+      document.getElementById("creditsSection").hidden = false;
+    }
+
+    const NIVEL_LABELS = { pendiente: "Pendiente", basico: "Básico", certificado: "Certificado", verificado: "Verificado" };
+
+    async function loadPerfil() {
+      const perfil = await api.getMe();
+
+      // Header
+      const inicial = (perfil.nombre || "?")[0].toUpperCase();
+      document.getElementById("avatar").textContent = inicial;
+      document.getElementById("profileName").textContent = perfil.nombre || "Sin nombre";
+      document.getElementById("profileMeta").textContent = [perfil.carrera, perfil.semestre ? `Semestre ${perfil.semestre}` : null].filter(Boolean).join(" · ") || "Completa tu perfil académico";
+      document.getElementById("emailDisplay").textContent = perfil.email;
+
+      const nivel = perfil.nivel_verificacion || "pendiente";
+      const badge = document.getElementById("nivelBadge");
+      badge.textContent = NIVEL_LABELS[nivel] || nivel;
+      badge.style.display = "inline-flex";
+
+      if (perfil.creditos_aprobados) updateCreditsBar(perfil.creditos_aprobados);
+
+      // Formulario
+      if (perfil.carrera) document.getElementById("carrera").value = perfil.carrera;
+      if (perfil.semestre) document.getElementById("semestre").value = perfil.semestre;
+      if (perfil.creditos_aprobados) document.getElementById("creditos_aprobados").value = perfil.creditos_aprobados;
+      if (perfil.estado_academico) document.getElementById("estado_academico").value = perfil.estado_academico;
+      document.getElementById("nombre").value = perfil.nombre || "";
+      document.getElementById("bio").value = perfil.bio || "";
+      document.getElementById("github_url").value = perfil.github_url || "";
+      document.getElementById("cv_url").value = perfil.cv_url || "";
+    }
+
+    loadPerfil();
+
+    // --- Certificaciones ---
+    const CERT_ESTADO = { pendiente: "En revisión", verificada: "Verificada", rechazada: "Rechazada" };
+    const CERT_BADGE  = { pendiente: "badge-cert-pendiente", verificada: "badge-cert-verificada", rechazada: "badge-cert-rechazada" };
+
+    async function loadCerts() {
+      try {
+        const certs = await api.misCertificaciones();
+        const list = document.getElementById("certList");
+        if (!certs.length) {
+          list.innerHTML = `<p style="padding:var(--space-3) var(--space-5); font-size:13px; opacity:0.45; font-style:italic;">Aún no tienes certificaciones. Agrega una para subir tu nivel de verificación.</p>`;
+          return;
+        }
+        list.innerHTML = certs.map(c => `
+          <div class="cert-row">
+            <div class="cert-info">
+              <div class="cert-nombre">${c.nombre}</div>
+              <div class="cert-meta">${c.entidad_emisora}${c.fecha_obtencion ? ' · ' + new Date(c.fecha_obtencion).toLocaleDateString('es-GT') : ''}</div>
+            </div>
+            <span class="tag ${CERT_BADGE[c.estado] || ''}">${CERT_ESTADO[c.estado] || c.estado}</span>
+          </div>`).join("");
+      } catch {}
+    }
+
+    loadCerts();
+
+    document.getElementById("toggleCertForm").addEventListener("click", () => {
+      document.getElementById("certForm").classList.toggle("open");
+    });
+    document.getElementById("cancelCert").addEventListener("click", () => {
+      document.getElementById("certForm").classList.remove("open");
+    });
+
+    document.getElementById("guardarCert").addEventListener("click", async () => {
+      const nombre = document.getElementById("certNombre").value.trim();
+      const entidad = document.getElementById("certEntidad").value.trim();
+      if (!nombre || !entidad) return alert("Nombre y entidad emisora son obligatorios.");
+
+      const btn = document.getElementById("guardarCert");
+      btn.disabled = true;
+      btn.textContent = "Guardando...";
+
+      try {
+        const fecha = document.getElementById("certFecha").value;
+        await api.agregarCertificacion({
+          tipo: document.getElementById("certTipo").value,
+          nombre,
+          entidad_emisora: entidad,
+          fecha_obtencion: fecha ? new Date(fecha).toISOString() : null,
+          url_verificacion: document.getElementById("certUrl").value.trim() || null,
+        });
+        document.getElementById("certNombre").value = "";
+        document.getElementById("certEntidad").value = "";
+        document.getElementById("certFecha").value = "";
+        document.getElementById("certUrl").value = "";
+        document.getElementById("certForm").classList.remove("open");
+        await loadCerts();
+      } catch (err) {
+        alert("Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Guardar certificación";
+      }
+    });
+
+    // Actualizar barra en tiempo real al tipear créditos
+    document.getElementById("creditos_aprobados").addEventListener("input", (e) => {
+      const val = Number(e.target.value);
+      if (val >= 0) updateCreditsBar(val);
+    });
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("saveBtn");
+      const saveMsg = document.getElementById("saveMsg");
+      const errorMsg = document.getElementById("errorMsg");
+      btn.disabled = true;
+      saveMsg.style.display = "none";
+      errorMsg.style.display = "none";
+
+      try {
+        await api.updateMe({
+          nombre: document.getElementById("nombre").value.trim() || undefined,
+          carrera: document.getElementById("carrera").value || undefined,
+          semestre: Number(document.getElementById("semestre").value) || undefined,
+          creditos_aprobados: Number(document.getElementById("creditos_aprobados").value) || undefined,
+          estado_academico: document.getElementById("estado_academico").value || undefined,
+          bio: document.getElementById("bio").value.trim() || undefined,
+          github_url: document.getElementById("github_url").value.trim() || undefined,
+          cv_url: document.getElementById("cv_url").value.trim() || undefined,
+        });
+        saveMsg.style.display = "inline";
+        setTimeout(() => { saveMsg.style.display = "none"; }, 3000);
+        loadPerfil();
+      } catch (err) {
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = "inline";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

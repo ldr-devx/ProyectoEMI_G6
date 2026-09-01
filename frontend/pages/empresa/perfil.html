@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi perfil — Empresa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 680px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .section-label { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.5; margin-bottom: var(--space-3); }
+    .profile-header { display: flex; align-items: center; gap: var(--space-4); }
+    .avatar { width: 56px; height: 56px; border-radius: var(--radius-md); background: var(--color-accent); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 22px; font-weight: 700; color: var(--color-bg); flex-shrink: 0; }
+    .profile-name { font-family: var(--font-heading); font-size: 24px; font-weight: 700; }
+    .profile-meta { font-size: 13px; opacity: 0.6; }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .profile-section { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-5); }
+    .btn-row { display: flex; gap: var(--space-3); justify-content: flex-end; }
+    #saveMsg { font-size: 13px; color: var(--color-accent); display: none; }
+    #errorMsg { font-size: 13px; color: var(--color-error, #f87171); display: none; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/pages/empresa/home.html" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+  </nav>
+
+  <main class="page">
+    <div class="profile-header">
+      <div class="avatar" id="avatar">🏢</div>
+      <div>
+        <div class="profile-name" id="profileName">Cargando...</div>
+        <div class="profile-meta" id="profileMeta"></div>
+      </div>
+    </div>
+
+    <!-- Datos de la empresa -->
+    <div class="card blueprint profile-section">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <p class="section-label">Datos de la empresa</p>
+
+      <div class="field">
+        <label class="label">Nombre de la empresa</label>
+        <input type="text" id="nombre_empresa" class="input" placeholder="Ej. TechGT S.A." />
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="label">Sector</label>
+          <select id="sector" class="input">
+            <option value="">Selecciona un sector</option>
+            <option value="Tecnología">Tecnología</option>
+            <option value="Finanzas">Finanzas</option>
+            <option value="Manufactura">Manufactura</option>
+            <option value="Consultoría">Consultoría</option>
+            <option value="Telecomunicaciones">Telecomunicaciones</option>
+            <option value="Energía">Energía</option>
+            <option value="Gobierno">Gobierno</option>
+            <option value="Educación">Educación</option>
+            <option value="Otro">Otro</option>
+          </select>
+        </div>
+        <div class="field">
+          <label class="label">Sitio web</label>
+          <input type="url" id="sitio_web" class="input" placeholder="https://tuempresa.com" />
+        </div>
+      </div>
+    </div>
+
+    <!-- Datos de contacto -->
+    <div class="card profile-section" style="border:1px solid var(--color-neutral-200);">
+      <p class="section-label">Contacto</p>
+
+      <div class="field">
+        <label class="label">Nombre de contacto</label>
+        <input type="text" id="nombre" class="input" placeholder="Ej. María Pérez (RRHH)" />
+      </div>
+      <div class="field">
+        <label class="label">Correo registrado</label>
+        <span class="input" id="emailDisplay" style="opacity:0.5; cursor:default; user-select:none; display:block;"></span>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <span id="saveMsg">✓ Perfil actualizado</span>
+      <span id="errorMsg"></span>
+      <button class="btn btn-primary" id="saveBtn">Guardar cambios</button>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    const user = auth.requireAuth(["empresa"]);
+    if (!user) throw new Error("No auth");
+
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    async function loadPerfil() {
+      const perfil = await api.getMe();
+
+      document.getElementById("profileName").textContent = perfil.nombre_empresa || perfil.nombre || "Sin nombre";
+      document.getElementById("profileMeta").textContent = [perfil.sector, perfil.sitio_web].filter(Boolean).join(" · ") || "Completa el perfil de tu empresa";
+      document.getElementById("emailDisplay").textContent = perfil.email;
+
+      document.getElementById("nombre_empresa").value = perfil.nombre_empresa || perfil.nombre || "";
+      document.getElementById("nombre").value = perfil.nombre || "";
+      if (perfil.sector) document.getElementById("sector").value = perfil.sector;
+      document.getElementById("sitio_web").value = perfil.sitio_web || "";
+    }
+
+    loadPerfil();
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("saveBtn");
+      const saveMsg = document.getElementById("saveMsg");
+      const errorMsg = document.getElementById("errorMsg");
+      btn.disabled = true;
+      saveMsg.style.display = "none";
+      errorMsg.style.display = "none";
+
+      try {
+        await api.updateMe({
+          nombre: document.getElementById("nombre").value.trim() || undefined,
+          nombre_empresa: document.getElementById("nombre_empresa").value.trim() || undefined,
+          sector: document.getElementById("sector").value || undefined,
+          sitio_web: document.getElementById("sitio_web").value.trim() || undefined,
+        });
+        saveMsg.style.display = "inline";
+        setTimeout(() => { saveMsg.style.display = "none"; }, 3000);
+        loadPerfil();
+      } catch (err) {
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = "inline";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

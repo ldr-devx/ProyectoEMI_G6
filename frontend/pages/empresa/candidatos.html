@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Candidatos</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 860px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .page-title { font-family: var(--font-heading); font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .vacante-section { display: flex; flex-direction: column; gap: var(--space-3); }
+    .vacante-header { padding: var(--space-4) var(--space-5); display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
+    .vacante-label { font-family: var(--font-heading); font-size: 15px; font-weight: 700; }
+    .vacante-sub { font-size: 13px; opacity: 0.6; }
+    .candidatos-list { display: flex; flex-direction: column; gap: var(--space-2); padding: 0 var(--space-2); }
+    .candidato-row { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-4) var(--space-5); flex-wrap: wrap; }
+    .candidato-info { flex: 1; display: flex; flex-direction: column; gap: 3px; min-width: 160px; }
+    .candidato-nombre { font-weight: 600; font-size: 14px; }
+    .candidato-meta { font-size: 12px; opacity: 0.55; }
+    .estado-select { font-size: 13px; padding: 4px 8px; border-radius: var(--radius-sm); border: 1px solid var(--color-neutral-300); background: var(--color-surface, var(--color-bg)); color: inherit; cursor: pointer; }
+    .nota-row { display: flex; gap: var(--space-2); align-items: center; flex: 1; min-width: 200px; }
+    .nota-input { font-size: 13px; padding: 4px 8px; border-radius: var(--radius-sm); border: 1px solid var(--color-neutral-300); background: transparent; color: inherit; flex: 1; }
+    .empty-candidatos { font-size: 13px; opacity: 0.45; padding: var(--space-4) var(--space-5); font-style: italic; }
+    .empty-vacantes { text-align:center; padding:var(--space-12) var(--space-6); display:flex; flex-direction:column; align-items:center; gap:var(--space-3); }
+    .empty-icon { font-size:40px; opacity:0.4; }
+    .empty-title { font-family:var(--font-heading); font-size:16px; font-weight:700; opacity:0.5; text-transform:uppercase; letter-spacing:0.06em; }
+    .spinner { text-align:center; padding:var(--space-10); opacity:0.4; font-size:13px; }
+    .badge-enviada { background: color-mix(in oklch, var(--color-neutral-400) 25%, transparent); color: var(--color-neutral-400); }
+    .badge-en_revision { background: color-mix(in oklch, var(--color-accent-2) 20%, transparent); color: var(--color-accent-2); }
+    .badge-aceptada { background: color-mix(in oklch, var(--color-accent) 20%, transparent); color: var(--color-accent); }
+    .badge-rechazada { background: color-mix(in oklch, #f87171 20%, transparent); color: #f87171; }
+    .save-btn { font-size: 12px; padding: 4px 10px; }
+    .toast { position:fixed; bottom:var(--space-6); right:var(--space-6); padding:var(--space-3) var(--space-5); border-radius:var(--radius-md); font-size:14px; font-weight:600; z-index:200; transition:opacity 0.3s; background:var(--color-accent); color:var(--color-bg); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/pages/empresa/home.html" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <div style="display:flex; gap:var(--space-3); align-items:center;">
+      <a href="/pages/empresa/mis-vacantes.html" class="btn btn-ghost" style="font-size:14px;">Mis vacantes</a>
+      <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+    </div>
+  </nav>
+
+  <main class="page">
+    <h1 class="page-title">Candidatos por vacante</h1>
+    <div id="contenido"><div class="spinner">Cargando...</div></div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    auth.requireAuth(["empresa"]);
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    const ESTADO_LABELS = { enviada: "Enviada", en_revision: "En revisión", aceptada: "Aceptada", rechazada: "Rechazada" };
+    const NIVEL_LABELS = { pendiente: "Pendiente", basico: "Básico", certificado: "Certificado", verificado: "Verificado" };
+
+    function toast(msg) {
+      const t = document.createElement("div");
+      t.className = "toast";
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.opacity = "0"; setTimeout(() => t.remove(), 300); }, 2500);
+    }
+
+    async function renderCandidatos(vacanteId, container) {
+      try {
+        const postulaciones = await api.postulacionesPorVacante(vacanteId);
+
+        if (!postulaciones.length) {
+          container.innerHTML = '<p class="empty-candidatos">Aún no hay postulaciones para esta vacante.</p>';
+          return;
+        }
+
+        // Cargar perfiles en paralelo
+        const perfilesMap = {};
+        await Promise.all(postulaciones.map(async p => {
+          try { perfilesMap[p.estudiante_id] = await api.getPerfil(p.estudiante_id); }
+          catch { perfilesMap[p.estudiante_id] = null; }
+        }));
+
+        container.innerHTML = `<div class="candidatos-list">${postulaciones.map(p => {
+          const perfil = perfilesMap[p.estudiante_id];
+          const nombre = perfil?.nombre || `Estudiante #${p.estudiante_id}`;
+          const meta = [perfil?.carrera, perfil?.semestre ? `Sem. ${perfil.semestre}` : null, perfil?.nivel_verificacion ? NIVEL_LABELS[perfil.nivel_verificacion] : null].filter(Boolean).join(' · ');
+
+          return `
+            <div class="card candidato-row" style="border:1px solid var(--color-neutral-200);">
+              <div class="candidato-info">
+                <div class="candidato-nombre">${nombre}</div>
+                ${meta ? `<div class="candidato-meta">${meta}</div>` : ''}
+              </div>
+
+              <select class="estado-select" data-postulacion="${p.id}" data-current="${p.estado}">
+                <option value="enviada" ${p.estado === 'enviada' ? 'selected' : ''}>Enviada</option>
+                <option value="en_revision" ${p.estado === 'en_revision' ? 'selected' : ''}>En revisión</option>
+                <option value="aceptada" ${p.estado === 'aceptada' ? 'selected' : ''}>Aceptada</option>
+                <option value="rechazada" ${p.estado === 'rechazada' ? 'selected' : ''}>Rechazada</option>
+              </select>
+
+              <div class="nota-row">
+                <input type="text" class="nota-input" data-postulacion="${p.id}" placeholder="Nota para el candidato (opcional)" value="${p.nota_empresa || ''}" />
+                <button class="btn btn-ghost save-btn" data-postulacion="${p.id}">Guardar</button>
+              </div>
+            </div>`;
+        }).join("")}</div>`;
+
+        // Eventos de guardar
+        container.querySelectorAll(".save-btn").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            const pid = btn.dataset.postulacion;
+            const select = container.querySelector(`.estado-select[data-postulacion="${pid}"]`);
+            const nota = container.querySelector(`.nota-input[data-postulacion="${pid}"]`);
+            btn.disabled = true;
+            try {
+              await api.actualizarEstado(Number(pid), {
+                estado: select.value,
+                nota_empresa: nota.value.trim() || null,
+              });
+              toast("✓ Estado actualizado");
+            } catch (err) {
+              toast("Error: " + err.message);
+            } finally {
+              btn.disabled = false;
+            }
+          });
+        });
+
+      } catch (err) {
+        container.innerHTML = `<p class="empty-candidatos" style="color:#f87171;">Error: ${err.message}</p>`;
+      }
+    }
+
+    async function cargar() {
+      const contenido = document.getElementById("contenido");
+      try {
+        const vacantes = await api.misVacantes();
+        const aprobadas = vacantes.filter(v => v.estado === "aprobada");
+
+        if (!aprobadas.length) {
+          contenido.innerHTML = `
+            <div class="empty-vacantes">
+              <div class="empty-icon">📋</div>
+              <div class="empty-title">Sin vacantes aprobadas</div>
+              <div style="font-size:13px; opacity:0.4;">Los candidatos aparecen aquí cuando una vacante tuya es aprobada por el moderador.</div>
+              <a href="/pages/empresa/mis-vacantes.html" class="btn btn-ghost" style="margin-top:var(--space-2);">Ver mis vacantes</a>
+            </div>`;
+          return;
+        }
+
+        contenido.innerHTML = aprobadas.map(v => `
+          <div class="vacante-section" style="margin-bottom:var(--space-6);">
+            <div class="card blueprint vacante-header">
+              <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+              <div>
+                <div class="vacante-label">${v.puesto}</div>
+                <div class="vacante-sub">${v.empresa_nombre} · ${v.carrera_compatible} · Sem. mín. ${v.semestre_minimo}</div>
+              </div>
+              <span class="tag tag-accent">Aprobada</span>
+            </div>
+            <div id="candidatos-${v.id}"><div class="spinner">Cargando candidatos...</div></div>
+          </div>`).join("");
+
+        // Cargar candidatos de cada vacante en paralelo
+        await Promise.all(aprobadas.map(v =>
+          renderCandidatos(v.id, document.getElementById(`candidatos-${v.id}`))
+        ));
+
+      } catch (err) {
+        contenido.innerHTML = `<p style="opacity:0.5; font-size:14px;">Error al cargar: ${err.message}</p>`;
+      }
+    }
+
+    cargar();
+  </script>
+</body>
+</html>

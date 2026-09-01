@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Vacantes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 860px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .filters-row { display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: flex-end; }
+    .filters-row .field { margin: 0; min-width: 180px; flex: 1; }
+    .counter { font-size: 13px; opacity: 0.55; font-family: var(--font-heading); letter-spacing: 0.06em; }
+    .feed { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: var(--space-4); }
+    .vacante-card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); text-decoration: none; color: inherit; }
+    .vacante-card-ref { border: 1px dashed color-mix(in oklch, var(--color-accent-2) 50%, transparent); background: color-mix(in oklch, var(--color-accent-2) 5%, transparent); border-radius: var(--radius-md); }
+    .card-puesto { font-family: var(--font-heading); font-size: 17px; font-weight: 700; line-height: 1.2; }
+    .card-empresa { font-size: 13px; opacity: 0.7; }
+    .tags-row { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .nota-ref { font-style: italic; font-size: 13px; opacity: 0.75; border-left: 2px solid var(--color-accent-2); padding-left: var(--space-3); line-height: 1.5; }
+    .empty-state { text-align: center; padding: var(--space-12) var(--space-6); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+    .empty-icon { font-size: 40px; opacity: 0.4; }
+    .empty-title { font-family: var(--font-heading); font-size: 16px; font-weight: 700; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.06em; }
+    .empty-sub { font-size: 13px; opacity: 0.4; }
+    .spinner { text-align: center; padding: var(--space-10); opacity: 0.4; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/pages/estudiante/home.html" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <div style="display:flex; gap:var(--space-3); align-items:center;">
+      <a href="/pages/estudiante/postulaciones.html" class="btn btn-ghost" style="font-size:14px;">Mis postulaciones</a>
+      <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+    </div>
+  </nav>
+
+  <main class="page">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:var(--space-3);">
+      <h1 style="font-family:var(--font-heading); font-size:22px; font-weight:700; text-transform:uppercase; letter-spacing:0.06em;">Vacantes disponibles</h1>
+      <span class="counter" id="counter">Cargando...</span>
+    </div>
+
+    <!-- Filtros -->
+    <div class="filters-row">
+      <div class="field">
+        <label class="label">Carrera</label>
+        <select id="filtroCarrera" class="input">
+          <option value="">Todas las carreras</option>
+          <option value="Ingeniería en Ciencias y Sistemas">Ing. en Ciencias y Sistemas</option>
+          <option value="Ingeniería Civil">Ing. Civil</option>
+          <option value="Ingeniería Mecánica">Ing. Mecánica</option>
+          <option value="Ingeniería Eléctrica">Ing. Eléctrica</option>
+          <option value="Ingeniería Industrial">Ing. Industrial</option>
+          <option value="Ingeniería Química">Ing. Química</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label">Semestre mínimo ≤</label>
+        <select id="filtroSemestre" class="input">
+          <option value="">Cualquier semestre</option>
+          <option value="1">1</option>
+          <option value="2">2</option>
+          <option value="3">3</option>
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6">6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9 o más</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label">Tipo de contrato</label>
+        <select id="filtroContrato" class="input">
+          <option value="">Cualquier tipo</option>
+          <option value="tiempo_completo">Tiempo completo</option>
+          <option value="medio_tiempo">Medio tiempo</option>
+          <option value="practica">Práctica</option>
+          <option value="freelance">Freelance</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label">Tipo</label>
+        <select id="filtroTipo" class="input">
+          <option value="">Empresa y referidos</option>
+          <option value="empresa">Solo empresas</option>
+          <option value="referido">Solo referidos</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Feed -->
+    <div id="feed" class="feed">
+      <div class="spinner">Cargando vacantes...</div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    auth.requireAuth(["estudiante"]);
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    const CONTRATO_LABELS = { tiempo_completo: "Tiempo completo", medio_tiempo: "Medio tiempo", practica: "Práctica", freelance: "Freelance" };
+    const MODALIDAD_LABELS = { presencial: "Presencial", remoto: "Remoto", hibrido: "Híbrido" };
+
+    function renderTarjeta(v) {
+      const esRef = v.tipo === "referido";
+      const contrato = CONTRATO_LABELS[v.tipo_contrato] || v.tipo_contrato;
+      const modalidad = MODALIDAD_LABELS[v.modalidad] || v.modalidad;
+
+      if (esRef) {
+        return `
+          <a href="/pages/estudiante/vacante-detalle.html?id=${v.id}" class="vacante-card vacante-card-ref">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+              <span class="tag tag-accent-2">Referido</span>
+              ${v.solo_plataforma ? '<span class="tag tag-accent" style="font-size:10px;">Solo plataforma</span>' : ''}
+            </div>
+            <div class="card-puesto">${v.puesto}</div>
+            <div class="card-empresa">${v.empresa_nombre}${v.ubicacion ? ' · ' + v.ubicacion : ''}</div>
+            ${v.nota_personal ? `<p class="nota-ref">"${v.nota_personal}"</p>` : ''}
+            <div class="tags-row">
+              <span class="tag tag-neutral">${contrato}</span>
+              <span class="tag tag-neutral">${modalidad}</span>
+              <span class="tag tag-neutral">Desde sem. ${v.semestre_minimo}</span>
+            </div>
+          </a>`;
+      }
+
+      return `
+        <a href="/pages/estudiante/vacante-detalle.html?id=${v.id}" class="card blueprint vacante-card">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <span class="tag tag-accent">Empresa</span>
+            ${v.solo_plataforma ? '<span class="tag tag-accent" style="font-size:10px;">Solo plataforma</span>' : ''}
+          </div>
+          <div class="card-puesto">${v.puesto}</div>
+          <div class="card-empresa">${v.empresa_nombre}${v.ubicacion ? ' · ' + v.ubicacion : ''}</div>
+          <div class="tags-row">
+            <span class="tag tag-neutral">${contrato}</span>
+            <span class="tag tag-neutral">${modalidad}</span>
+            <span class="tag tag-neutral">Desde sem. ${v.semestre_minimo}</span>
+          </div>
+        </a>`;
+    }
+
+    function renderFeed(vacantes) {
+      const feed = document.getElementById("feed");
+      const counter = document.getElementById("counter");
+
+      if (!vacantes.length) {
+        counter.textContent = "0 vacantes";
+        feed.innerHTML = `
+          <div class="empty-state" style="grid-column:1/-1;">
+            <div class="empty-icon">🔍</div>
+            <div class="empty-title">Sin resultados</div>
+            <div class="empty-sub">No encontramos vacantes con esos filtros. Intenta con otros criterios.</div>
+          </div>`;
+        return;
+      }
+
+      counter.textContent = `${vacantes.length} vacante${vacantes.length !== 1 ? "s" : ""} disponible${vacantes.length !== 1 ? "s" : ""}`;
+      feed.innerHTML = vacantes.map(renderTarjeta).join("");
+    }
+
+    async function cargarVacantes() {
+      const params = {};
+      const carrera = document.getElementById("filtroCarrera").value;
+      const semestre = document.getElementById("filtroSemestre").value;
+      const contrato = document.getElementById("filtroContrato").value;
+      const tipo = document.getElementById("filtroTipo").value;
+
+      if (carrera) params.carrera = carrera;
+      if (semestre) params.semestre_minimo = semestre;
+      if (contrato) params.tipo_contrato = contrato;
+      if (tipo) params.tipo = tipo;
+
+      document.getElementById("feed").innerHTML = '<div class="spinner">Cargando...</div>';
+      document.getElementById("counter").textContent = "Cargando...";
+
+      try {
+        const vacantes = await api.getVacantes(params);
+        renderFeed(vacantes);
+      } catch (err) {
+        document.getElementById("feed").innerHTML = `<p style="opacity:0.5; font-size:14px; grid-column:1/-1;">Error al cargar vacantes: ${err.message}</p>`;
+        document.getElementById("counter").textContent = "";
+      }
+    }
+
+    ["filtroCarrera", "filtroSemestre", "filtroContrato", "filtroTipo"].forEach(id => {
+      document.getElementById(id).addEventListener("change", cargarVacantes);
+    });
+
+    cargarVacantes();
+  </script>
+</body>
+</html>

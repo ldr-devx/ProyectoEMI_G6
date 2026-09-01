@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis vacantes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 860px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .page-header { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: var(--space-3); }
+    .page-title { font-family: var(--font-heading); font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .vacantes-list { display: flex; flex-direction: column; gap: var(--space-3); }
+    .vacante-row { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); }
+    .row-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+    .row-info { display: flex; flex-direction: column; gap: var(--space-1); flex: 1; }
+    .row-puesto { font-family: var(--font-heading); font-size: 16px; font-weight: 700; }
+    .row-meta { font-size: 13px; opacity: 0.6; }
+    .tags-row { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .estado-pendiente { background: color-mix(in oklch, var(--color-accent-2) 20%, transparent); color: var(--color-accent-2); }
+    .estado-aprobada { background: color-mix(in oklch, var(--color-accent) 20%, transparent); color: var(--color-accent); }
+    .estado-rechazada { background: color-mix(in oklch, #f87171 20%, transparent); color: #f87171; }
+    .pending-note { font-size: 12px; opacity: 0.55; font-style: italic; }
+    .empty-state { text-align: center; padding: var(--space-12) var(--space-6); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+    .empty-icon { font-size: 40px; opacity: 0.4; }
+    .empty-title { font-family: var(--font-heading); font-size: 16px; font-weight: 700; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.06em; }
+    .empty-sub { font-size: 13px; opacity: 0.4; }
+    .spinner { text-align: center; padding: var(--space-10); opacity: 0.4; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <span class="nav-brand" id="navBrand">Empleo USAC · FIUSAC</span>
+    <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+  </nav>
+
+  <main class="page">
+    <div class="page-header">
+      <h1 class="page-title" id="pageTitle">Mis vacantes</h1>
+      <a href="#" id="publicarLink" class="btn btn-primary" style="font-size:14px;">+ Publicar nueva</a>
+    </div>
+
+    <div id="listaVacantes">
+      <div class="spinner">Cargando...</div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    const user = auth.requireAuth(["empresa", "referidor"]);
+    if (!user) throw new Error("No auth");
+
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    const esReferidor = user.tipo_usuario === "referidor";
+    const homeUrl = esReferidor ? "/pages/referidor/home.html" : "/pages/empresa/home.html";
+    const publicarUrl = esReferidor ? "/pages/referidor/publicar-referido.html" : "/pages/empresa/publicar-vacante.html";
+    const titulo = esReferidor ? "Mis referidos" : "Mis vacantes";
+
+    document.getElementById("navBrand").href = homeUrl;
+    document.getElementById("navBrand").outerHTML = `<a href="${homeUrl}" class="nav-brand">Empleo USAC · FIUSAC</a>`;
+    document.getElementById("pageTitle").textContent = titulo;
+    document.getElementById("publicarLink").href = publicarUrl;
+    document.getElementById("publicarLink").textContent = esReferidor ? "+ Publicar referido" : "+ Publicar vacante";
+
+    const CONTRATO_LABELS = { tiempo_completo: "Tiempo completo", medio_tiempo: "Medio tiempo", practica: "Práctica", freelance: "Freelance" };
+    const MODALIDAD_LABELS = { presencial: "Presencial", remoto: "Remoto", hibrido: "Híbrido" };
+
+    function badgeEstado(estado) {
+      const clases = { pendiente: "estado-pendiente", aprobada: "estado-aprobada", rechazada: "estado-rechazada" };
+      const labels = { pendiente: "En revisión", aprobada: "Aprobada", rechazada: "Rechazada" };
+      return `<span class="tag ${clases[estado] || ''}">${labels[estado] || estado}</span>`;
+    }
+
+    async function cargar() {
+      try {
+        const vacantes = await api.misVacantes();
+        const lista = document.getElementById("listaVacantes");
+
+        if (!vacantes.length) {
+          lista.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">${esReferidor ? '🤝' : '📋'}</div>
+              <div class="empty-title">${esReferidor ? 'Aún no has publicado referidos' : 'Aún no has publicado vacantes'}</div>
+              <div class="empty-sub">Cuando publiques, aparecerán aquí con su estado de moderación.</div>
+              <a href="${publicarUrl}" class="btn btn-primary" style="margin-top:var(--space-2);">${esReferidor ? 'Publicar primer referido' : 'Publicar primera vacante'}</a>
+            </div>`;
+          return;
+        }
+
+        lista.innerHTML = `<div class="vacantes-list">${vacantes.map(v => `
+          <div class="card ${v.tipo === 'empresa' ? 'blueprint' : ''} vacante-row" ${v.tipo === 'empresa' ? '' : 'style="border:1px dashed color-mix(in oklch, var(--color-accent-2) 50%, transparent);"'}>
+            ${v.tipo === 'empresa' ? '<i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>' : ''}
+            <div class="row-top">
+              <div class="row-info">
+                <div class="row-puesto">${v.puesto}</div>
+                <div class="row-meta">${v.empresa_nombre}${v.ubicacion ? ' · ' + v.ubicacion : ''}</div>
+              </div>
+              ${badgeEstado(v.estado)}
+            </div>
+            <div class="tags-row">
+              <span class="tag tag-neutral">${CONTRATO_LABELS[v.tipo_contrato] || v.tipo_contrato}</span>
+              <span class="tag tag-neutral">${MODALIDAD_LABELS[v.modalidad] || v.modalidad}</span>
+              <span class="tag tag-neutral">${v.carrera_compatible}</span>
+              <span class="tag tag-neutral">Sem. mín. ${v.semestre_minimo}</span>
+            </div>
+            ${v.estado === 'pendiente' ? '<p class="pending-note">⏳ Esta vacante está en revisión por el moderador. Aparecerá en el feed una vez aprobada.</p>' : ''}
+            ${v.estado === 'rechazada' ? '<p class="pending-note" style="color:#f87171;">✗ Esta vacante fue rechazada. Publica una nueva si deseas corregirla.</p>' : ''}
+          </div>`).join("")}
+        </div>`;
+      } catch (err) {
+        document.getElementById("listaVacantes").innerHTML = `<p style="opacity:0.5; font-size:14px;">Error al cargar: ${err.message}</p>`;
+      }
+    }
+
+    cargar();
+  </script>
+</body>
+</html>

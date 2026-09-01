@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro — Referidor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-8) var(--space-4); }
+    .form-card { width: 100%; max-width: 480px; padding: var(--space-8); display: flex; flex-direction: column; gap: var(--space-5); }
+    .form-title { font-family: var(--font-heading); font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .form-sub { font-size: 13px; opacity: 0.6; }
+    .info-box { background: color-mix(in oklch, var(--color-accent-2) 10%, transparent); border: 1px solid color-mix(in oklch, var(--color-accent-2) 30%, transparent); border-radius: var(--radius-md); padding: var(--space-4); font-size: 13px; line-height: 1.6; opacity: 0.85; }
+    #errorMsg { color: var(--color-error, #f87171); font-size: 13px; display: none; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <a href="/login.html" class="btn btn-ghost" style="font-size:14px;">Iniciar sesión</a>
+  </nav>
+
+  <main class="page">
+    <div class="card blueprint form-card">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+
+      <div>
+        <div class="form-title">🤝 Registro de Referidor</div>
+        <p class="form-sub">¿Dejas un puesto? Recomienda a alguien de tu misma comunidad académica</p>
+      </div>
+
+      <div class="info-box">
+        Como referidor puedes publicar vacantes que dejas y recomendar directamente a candidatos de tu carrera. Tu recomendación aparece diferenciada en el feed con tu nota personal.
+      </div>
+
+      <div class="field">
+        <label class="label">Nombre completo</label>
+        <input type="text" id="nombre" class="input" placeholder="Ej. Carlos Méndez" />
+      </div>
+      <div class="field">
+        <label class="label">Correo electrónico</label>
+        <input type="email" id="email" class="input" placeholder="tu.correo@ejemplo.com" />
+      </div>
+      <div class="field">
+        <label class="label">Carrera de la que egresaste</label>
+        <select id="carrera_egresada" class="input">
+          <option value="">Selecciona tu carrera</option>
+          <option value="Ingeniería en Ciencias y Sistemas">Ingeniería en Ciencias y Sistemas</option>
+          <option value="Ingeniería Civil">Ingeniería Civil</option>
+          <option value="Ingeniería Mecánica">Ingeniería Mecánica</option>
+          <option value="Ingeniería Eléctrica">Ingeniería Eléctrica</option>
+          <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+          <option value="Ingeniería Química">Ingeniería Química</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label">Contraseña</label>
+        <input type="password" id="password" class="input" placeholder="Mínimo 8 caracteres" />
+      </div>
+      <div class="field">
+        <label class="label">Confirmar contraseña</label>
+        <input type="password" id="passwordConfirm" class="input" placeholder="Repite la contraseña" />
+      </div>
+
+      <div id="errorMsg"></div>
+
+      <button class="btn btn-primary" id="btnRegistrar">Crear cuenta de referidor</button>
+      <p style="text-align:center; font-size:13px; opacity:0.5;">¿Ya tienes cuenta? <a href="/login.html">Iniciar sesión</a></p>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    if (auth.isLoggedIn()) auth.redirectToDashboard();
+
+    document.getElementById("btnRegistrar").addEventListener("click", async () => {
+      const nombre = document.getElementById("nombre").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const carrera_egresada = document.getElementById("carrera_egresada").value;
+      const pw = document.getElementById("password").value;
+      const pw2 = document.getElementById("passwordConfirm").value;
+
+      if (!nombre || !email || !carrera_egresada || !pw) return alert("Completa todos los campos requeridos.");
+      if (pw !== pw2) return alert("Las contraseñas no coinciden.");
+      if (pw.length < 8) return alert("La contraseña debe tener al menos 8 caracteres.");
+
+      const btn = document.getElementById("btnRegistrar");
+      const errorMsg = document.getElementById("errorMsg");
+      btn.disabled = true;
+      btn.textContent = "Creando cuenta...";
+      errorMsg.style.display = "none";
+
+      try {
+        const res = await api.registro({
+          email,
+          password: pw,
+          tipo_usuario: "referidor",
+          nombre,
+        });
+        auth.saveSession(res);
+
+        await api.updateMe({ carrera_egresada });
+
+        window.location.href = "/pages/referidor/home.html";
+      } catch (err) {
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = "block";
+        btn.disabled = false;
+        btn.textContent = "Crear cuenta de referidor";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro — Empresa</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-8) var(--space-4); }
+    .form-card { width: 100%; max-width: 480px; padding: var(--space-8); display: flex; flex-direction: column; gap: var(--space-5); }
+    .form-title { font-family: var(--font-heading); font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .form-sub { font-size: 13px; opacity: 0.6; }
+    #errorMsg { color: var(--color-error, #f87171); font-size: 13px; display: none; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <a href="/login.html" class="btn btn-ghost" style="font-size:14px;">Iniciar sesión</a>
+  </nav>
+
+  <main class="page">
+    <div class="card blueprint form-card">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+
+      <div>
+        <div class="form-title">🏢 Registro de Empresa</div>
+        <p class="form-sub">Publica vacantes dirigidas a candidatos verificados de la Facultad de Ingeniería</p>
+      </div>
+
+      <div class="field">
+        <label class="label">Nombre de la empresa</label>
+        <input type="text" id="nombre_empresa" class="input" placeholder="Ej. TechGT S.A." />
+      </div>
+      <div class="field">
+        <label class="label">Correo de contacto</label>
+        <input type="email" id="email" class="input" placeholder="rrhh@tuempresa.com" />
+      </div>
+      <div class="field">
+        <label class="label">Sector</label>
+        <select id="sector" class="input">
+          <option value="">Selecciona un sector</option>
+          <option value="Tecnología">Tecnología</option>
+          <option value="Finanzas">Finanzas</option>
+          <option value="Manufactura">Manufactura</option>
+          <option value="Consultoría">Consultoría</option>
+          <option value="Telecomunicaciones">Telecomunicaciones</option>
+          <option value="Energía">Energía</option>
+          <option value="Gobierno">Gobierno</option>
+          <option value="Educación">Educación</option>
+          <option value="Otro">Otro</option>
+        </select>
+      </div>
+      <div class="field">
+        <label class="label">Sitio web (opcional)</label>
+        <input type="url" id="sitio_web" class="input" placeholder="https://tuempresa.com" />
+      </div>
+      <div class="field">
+        <label class="label">Contraseña</label>
+        <input type="password" id="password" class="input" placeholder="Mínimo 8 caracteres" />
+      </div>
+      <div class="field">
+        <label class="label">Confirmar contraseña</label>
+        <input type="password" id="passwordConfirm" class="input" placeholder="Repite la contraseña" />
+      </div>
+
+      <div id="errorMsg"></div>
+
+      <button class="btn btn-primary" id="btnRegistrar">Crear cuenta de empresa</button>
+      <p style="text-align:center; font-size:13px; opacity:0.5;">¿Ya tienes cuenta? <a href="/login.html">Iniciar sesión</a></p>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    if (auth.isLoggedIn()) auth.redirectToDashboard();
+
+    document.getElementById("btnRegistrar").addEventListener("click", async () => {
+      const nombre_empresa = document.getElementById("nombre_empresa").value.trim();
+      const email = document.getElementById("email").value.trim();
+      const sector = document.getElementById("sector").value;
+      const pw = document.getElementById("password").value;
+      const pw2 = document.getElementById("passwordConfirm").value;
+
+      if (!nombre_empresa || !email || !sector || !pw) return alert("Completa todos los campos requeridos.");
+      if (pw !== pw2) return alert("Las contraseñas no coinciden.");
+      if (pw.length < 8) return alert("La contraseña debe tener al menos 8 caracteres.");
+
+      const btn = document.getElementById("btnRegistrar");
+      const errorMsg = document.getElementById("errorMsg");
+      btn.disabled = true;
+      btn.textContent = "Creando cuenta...";
+      errorMsg.style.display = "none";
+
+      try {
+        const res = await api.registro({
+          email,
+          password: pw,
+          tipo_usuario: "empresa",
+          nombre: nombre_empresa,
+        });
+        auth.saveSession(res);
+
+        await api.updateMe({
+          nombre_empresa,
+          sector,
+          sitio_web: document.getElementById("sitio_web").value.trim() || null,
+        });
+
+        window.location.href = "/pages/empresa/home.html";
+      } catch (err) {
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = "block";
+        btn.disabled = false;
+        btn.textContent = "Crear cuenta de empresa";
+      }
+    });
+  </script>
+</body>
+</html>

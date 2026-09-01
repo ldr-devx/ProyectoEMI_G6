@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Certificaciones pendientes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 760px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .page-title { font-family: var(--font-heading); font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .cert-list { display: flex; flex-direction: column; gap: var(--space-3); }
+    .cert-card { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); }
+    .cert-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+    .cert-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .cert-nombre { font-family: var(--font-heading); font-size: 16px; font-weight: 700; }
+    .cert-meta { font-size: 13px; opacity: 0.6; }
+    .cert-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .empty-state { text-align:center; padding:var(--space-12) var(--space-6); display:flex; flex-direction:column; align-items:center; gap:var(--space-3); }
+    .empty-icon { font-size:40px; opacity:0.4; }
+    .empty-title { font-family:var(--font-heading); font-size:16px; font-weight:700; opacity:0.5; text-transform:uppercase; letter-spacing:0.06em; }
+    .spinner { text-align:center; padding:var(--space-10); opacity:0.4; font-size:13px; }
+    .toast { position:fixed; bottom:var(--space-6); right:var(--space-6); padding:var(--space-3) var(--space-5); border-radius:var(--radius-md); font-size:14px; font-weight:600; z-index:200; transition:opacity 0.3s; }
+    .toast-ok { background:var(--color-accent); color:var(--color-bg); }
+    .toast-err { background:#f87171; color:#fff; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/pages/moderador/home.html" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <div style="display:flex; gap:var(--space-3); align-items:center;">
+      <span class="tag tag-accent-2">Moderador</span>
+      <a href="/pages/moderador/cola.html" class="btn btn-ghost" style="font-size:14px;">Cola vacantes</a>
+      <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+    </div>
+  </nav>
+
+  <main class="page">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:var(--space-3);">
+      <h1 class="page-title">🎓 Certificaciones pendientes</h1>
+      <span style="font-size:13px; opacity:0.5; font-family:var(--font-heading); letter-spacing:0.06em;" id="counter"></span>
+    </div>
+    <div id="lista"><div class="spinner">Cargando...</div></div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    auth.requireAuth(["moderador"]);
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    const TIPO_LABELS = { propia: "Plataforma", afiliado: "Afiliado externo" };
+
+    function toast(msg, tipo = "ok") {
+      const t = document.createElement("div");
+      t.className = `toast toast-${tipo}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.opacity = "0"; setTimeout(() => t.remove(), 300); }, 2500);
+    }
+
+    async function cargar() {
+      const lista = document.getElementById("lista");
+      const counter = document.getElementById("counter");
+      try {
+        const certs = await api.certsPendientes();
+        counter.textContent = `${certs.length} pendiente${certs.length !== 1 ? 's' : ''}`;
+
+        if (!certs.length) {
+          lista.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">✓</div>
+              <div class="empty-title">Sin pendientes</div>
+              <div style="font-size:13px; opacity:0.4;">No hay certificaciones esperando revisión.</div>
+            </div>`;
+          return;
+        }
+
+        lista.innerHTML = `<div class="cert-list">${certs.map(c => `
+          <div class="card blueprint cert-card" data-id="${c.id}">
+            <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+            <div class="cert-top">
+              <div class="cert-info">
+                <div class="cert-nombre">${c.nombre}</div>
+                <div class="cert-meta">
+                  ${c.entidad_emisora}
+                  ${c.fecha_obtencion ? ' · ' + new Date(c.fecha_obtencion).toLocaleDateString('es-GT') : ''}
+                  · Estudiante #${c.usuario_id}
+                </div>
+              </div>
+              <span class="tag tag-accent-2">${TIPO_LABELS[c.tipo] || c.tipo}</span>
+            </div>
+            ${c.url_verificacion ? `<a href="${c.url_verificacion}" target="_blank" rel="noopener noreferrer" style="font-size:13px; color:var(--color-accent); word-break:break-all;">🔗 Ver credencial</a>` : '<p style="font-size:13px; opacity:0.4; font-style:italic;">Sin URL de verificación</p>'}
+            <div class="cert-actions">
+              <button class="btn btn-ghost btn-rechazar" data-id="${c.id}" style="font-size:13px; color:#f87171; border-color:#f87171;">Rechazar</button>
+              <button class="btn btn-primary btn-verificar" data-id="${c.id}" style="font-size:13px;">✓ Verificar</button>
+            </div>
+          </div>`).join("")}</div>`;
+
+        document.querySelectorAll(".btn-verificar").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            btn.disabled = true;
+            btn.textContent = "Verificando...";
+            try {
+              await api.verificarCert(Number(btn.dataset.id));
+              toast("✓ Certificación verificada — nivel del estudiante actualizado");
+              await cargar();
+            } catch (err) {
+              toast("Error: " + err.message, "err");
+              btn.disabled = false;
+              btn.textContent = "✓ Verificar";
+            }
+          });
+        });
+
+        document.querySelectorAll(".btn-rechazar").forEach(btn => {
+          btn.addEventListener("click", async () => {
+            if (!confirm("¿Rechazar esta certificación?")) return;
+            btn.disabled = true;
+            try {
+              await api.rechazarCert(Number(btn.dataset.id));
+              toast("Certificación rechazada", "err");
+              await cargar();
+            } catch (err) {
+              toast("Error: " + err.message, "err");
+              btn.disabled = false;
+            }
+          });
+        });
+
+      } catch (err) {
+        lista.innerHTML = `<p style="opacity:0.5; font-size:14px;">Error: ${err.message}</p>`;
+      }
+    }
+
+    cargar();
+  </script>
+</body>
+</html>

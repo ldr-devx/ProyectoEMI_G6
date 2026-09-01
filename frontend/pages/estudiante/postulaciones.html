@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mis postulaciones</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 760px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .page-title { font-family: var(--font-heading); font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .post-list { display: flex; flex-direction: column; gap: var(--space-3); }
+    .post-row { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); }
+    .post-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+    .post-info { display: flex; flex-direction: column; gap: 4px; flex: 1; }
+    .post-puesto { font-family: var(--font-heading); font-size: 16px; font-weight: 700; }
+    .post-empresa { font-size: 13px; opacity: 0.6; }
+    .post-fecha { font-size: 12px; opacity: 0.4; }
+    .nota-empresa { font-size: 13px; padding: var(--space-3); border-left: 2px solid var(--color-accent); opacity: 0.8; font-style: italic; }
+    .empty-state { text-align: center; padding: var(--space-12) var(--space-6); display: flex; flex-direction: column; align-items: center; gap: var(--space-3); }
+    .empty-icon { font-size: 40px; opacity: 0.4; }
+    .empty-title { font-family: var(--font-heading); font-size: 16px; font-weight: 700; opacity: 0.5; text-transform: uppercase; letter-spacing: 0.06em; }
+    .empty-sub { font-size: 13px; opacity: 0.4; }
+    .spinner { text-align: center; padding: var(--space-10); opacity: 0.4; font-size: 13px; }
+    /* Estado badges */
+    .badge-enviada { background: color-mix(in oklch, var(--color-neutral-400) 25%, transparent); color: var(--color-neutral-400); }
+    .badge-en_revision { background: color-mix(in oklch, var(--color-accent-2) 20%, transparent); color: var(--color-accent-2); }
+    .badge-aceptada { background: color-mix(in oklch, var(--color-accent) 20%, transparent); color: var(--color-accent); }
+    .badge-rechazada { background: color-mix(in oklch, #f87171 20%, transparent); color: #f87171; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/pages/estudiante/home.html" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <div style="display:flex; gap:var(--space-3); align-items:center;">
+      <a href="/pages/estudiante/vacantes.html" class="btn btn-ghost" style="font-size:14px;">Ver vacantes</a>
+      <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+    </div>
+  </nav>
+
+  <main class="page">
+    <h1 class="page-title">Mis postulaciones</h1>
+    <div id="lista"><div class="spinner">Cargando...</div></div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    auth.requireAuth(["estudiante"]);
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    const ESTADO_LABELS = { enviada: "Enviada", en_revision: "En revisión", aceptada: "Aceptada", rechazada: "Rechazada" };
+    const ESTADO_BADGE  = { enviada: "badge-enviada", en_revision: "badge-en_revision", aceptada: "badge-aceptada", rechazada: "badge-rechazada" };
+
+    async function cargar() {
+      const lista = document.getElementById("lista");
+      try {
+        const postulaciones = await api.misPostulaciones();
+
+        if (!postulaciones.length) {
+          lista.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">📋</div>
+              <div class="empty-title">Aún no te has postulado</div>
+              <div class="empty-sub">Cuando postules a una vacante, podrás ver su estado aquí.</div>
+              <a href="/pages/estudiante/vacantes.html" class="btn btn-primary" style="margin-top:var(--space-2);">Explorar vacantes</a>
+            </div>`;
+          return;
+        }
+
+        // Enriquecer con datos de la vacante
+        const vacantesMap = {};
+        await Promise.all(postulaciones.map(async p => {
+          if (!vacantesMap[p.vacante_id]) {
+            try { vacantesMap[p.vacante_id] = await api.getVacante(p.vacante_id); }
+            catch { vacantesMap[p.vacante_id] = null; }
+          }
+        }));
+
+        lista.innerHTML = `<div class="post-list">${postulaciones.map(p => {
+          const v = vacantesMap[p.vacante_id];
+          const fecha = p.created_at ? new Date(p.created_at).toLocaleDateString('es-GT') : '';
+          const badge = ESTADO_BADGE[p.estado] || '';
+          const label = ESTADO_LABELS[p.estado] || p.estado;
+
+          return `
+            <div class="card post-row" style="border:1px solid var(--color-neutral-200);">
+              <div class="post-top">
+                <div class="post-info">
+                  <div class="post-puesto">${v ? v.puesto : `Vacante #${p.vacante_id}`}</div>
+                  <div class="post-empresa">${v ? v.empresa_nombre : '—'}${v?.ubicacion ? ' · ' + v.ubicacion : ''}</div>
+                  ${fecha ? `<div class="post-fecha">Postulado el ${fecha}</div>` : ''}
+                </div>
+                <span class="tag ${badge}">${label}</span>
+              </div>
+              ${p.nota_empresa ? `<div class="nota-empresa">"${p.nota_empresa}"</div>` : ''}
+              ${v ? `<a href="/pages/estudiante/vacante-detalle.html?id=${v.id}" class="btn btn-ghost" style="align-self:flex-start; font-size:13px;">Ver vacante →</a>` : ''}
+            </div>`;
+        }).join("")}</div>`;
+
+      } catch (err) {
+        lista.innerHTML = `<p style="opacity:0.5; font-size:14px;">Error al cargar postulaciones: ${err.message}</p>`;
+      }
+    }
+
+    cargar();
+  </script>
+</body>
+</html>

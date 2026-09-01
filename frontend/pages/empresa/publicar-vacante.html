@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Publicar vacante</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 680px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .page-title { font-family: var(--font-heading); font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .section-label { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.5; margin-bottom: var(--space-3); }
+    .form-section { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-5); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .exclusivity-box { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-4); background: color-mix(in oklch, var(--color-accent) 8%, transparent); border: 1px solid color-mix(in oklch, var(--color-accent) 25%, transparent); border-radius: var(--radius-md); }
+    .checkbox-row { display: flex; align-items: center; gap: var(--space-2); cursor: pointer; }
+    .checkbox-row input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--color-accent); cursor: pointer; }
+    .checkbox-label { font-size: 14px; }
+    #exclusivaDate { display: none; }
+    .btn-row { display: flex; gap: var(--space-3); justify-content: flex-end; }
+    #errorMsg { font-size: 13px; color: var(--color-error, #f87171); display: none; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/pages/empresa/home.html" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+  </nav>
+
+  <main class="page">
+    <div>
+      <p style="font-size:13px; opacity:0.5; margin-bottom:var(--space-1);">Empresa</p>
+      <h1 class="page-title">📢 Publicar vacante</h1>
+    </div>
+
+    <!-- Información principal -->
+    <div class="card blueprint form-section">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <p class="section-label">Información del puesto</p>
+
+      <div class="field">
+        <label class="label">Nombre del puesto *</label>
+        <input type="text" id="puesto" class="input" placeholder="Ej. Backend Developer Junior" />
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="label">Empresa *</label>
+          <input type="text" id="empresa_nombre" class="input" placeholder="Nombre de la empresa" />
+        </div>
+        <div class="field">
+          <label class="label">Ubicación</label>
+          <input type="text" id="ubicacion" class="input" placeholder="Ej. Ciudad de Guatemala" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Descripción del puesto *</label>
+        <textarea id="descripcion" class="input" rows="4" placeholder="Describe las responsabilidades y el entorno de trabajo..." style="resize:vertical;"></textarea>
+      </div>
+
+      <div class="field">
+        <label class="label">Requisitos</label>
+        <textarea id="requisitos" class="input" rows="3" placeholder="Tecnologías, habilidades o experiencia requerida..." style="resize:vertical;"></textarea>
+      </div>
+    </div>
+
+    <!-- Perfil del candidato -->
+    <div class="card form-section" style="border:1px solid var(--color-neutral-200);">
+      <p class="section-label">Perfil del candidato</p>
+
+      <div class="field">
+        <label class="label">Carrera compatible *</label>
+        <select id="carrera_compatible" class="input">
+          <option value="">Selecciona una carrera</option>
+          <option value="Ingeniería en Ciencias y Sistemas">Ingeniería en Ciencias y Sistemas</option>
+          <option value="Ingeniería Civil">Ingeniería Civil</option>
+          <option value="Ingeniería Mecánica">Ingeniería Mecánica</option>
+          <option value="Ingeniería Eléctrica">Ingeniería Eléctrica</option>
+          <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+          <option value="Ingeniería Química">Ingeniería Química</option>
+          <option value="Todas">Todas las carreras</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="label">Semestre mínimo</label>
+          <input type="number" id="semestre_minimo" class="input" min="1" max="12" value="1" />
+        </div>
+        <div class="field">
+          <label class="label">Modalidad *</label>
+          <select id="modalidad" class="input">
+            <option value="presencial">Presencial</option>
+            <option value="remoto">Remoto</option>
+            <option value="hibrido">Híbrido</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Tipo de contrato *</label>
+        <select id="tipo_contrato" class="input">
+          <option value="tiempo_completo">Tiempo completo</option>
+          <option value="medio_tiempo">Medio tiempo</option>
+          <option value="practica">Práctica / Pasantía</option>
+          <option value="freelance">Freelance</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Exclusividad -->
+    <div class="exclusivity-box">
+      <p class="section-label" style="margin-bottom:0;">Exclusividad en plataforma</p>
+      <label class="checkbox-row">
+        <input type="checkbox" id="solo_plataforma" />
+        <span class="checkbox-label">Solo disponible dentro de la plataforma</span>
+      </label>
+      <div id="exclusivaDate">
+        <div class="field">
+          <label class="label">Exclusiva hasta</label>
+          <input type="date" id="exclusiva_hasta" class="input" />
+        </div>
+      </div>
+    </div>
+
+    <div id="errorMsg"></div>
+
+    <div class="btn-row">
+      <a href="/pages/empresa/home.html" class="btn btn-ghost">Cancelar</a>
+      <button class="btn btn-primary" id="publicarBtn">Publicar vacante</button>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    const user = auth.requireAuth(["empresa"]);
+    if (!user) throw new Error("No auth");
+
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    // Autocompletar empresa desde el perfil
+    api.getMe().then(perfil => {
+      if (perfil.nombre_empresa) document.getElementById("empresa_nombre").value = perfil.nombre_empresa;
+    }).catch(() => {});
+
+    // Toggle fecha exclusividad
+    document.getElementById("solo_plataforma").addEventListener("change", (e) => {
+      document.getElementById("exclusivaDate").style.display = e.target.checked ? "block" : "none";
+    });
+
+    document.getElementById("publicarBtn").addEventListener("click", async () => {
+      const puesto = document.getElementById("puesto").value.trim();
+      const empresa_nombre = document.getElementById("empresa_nombre").value.trim();
+      const carrera_compatible = document.getElementById("carrera_compatible").value;
+      const descripcion = document.getElementById("descripcion").value.trim();
+
+      if (!puesto || !empresa_nombre || !carrera_compatible || !descripcion) {
+        return alert("Completa los campos obligatorios (*).");
+      }
+
+      const btn = document.getElementById("publicarBtn");
+      const errorMsg = document.getElementById("errorMsg");
+      btn.disabled = true;
+      btn.textContent = "Publicando...";
+      errorMsg.style.display = "none";
+
+      const exclusiva_hasta_val = document.getElementById("exclusiva_hasta").value;
+
+      try {
+        await api.publicarVacante({
+          tipo: "empresa",
+          puesto,
+          empresa_nombre,
+          carrera_compatible,
+          semestre_minimo: Number(document.getElementById("semestre_minimo").value) || 1,
+          modalidad: document.getElementById("modalidad").value,
+          tipo_contrato: document.getElementById("tipo_contrato").value,
+          ubicacion: document.getElementById("ubicacion").value.trim() || null,
+          descripcion,
+          requisitos: document.getElementById("requisitos").value.trim() || null,
+          solo_plataforma: document.getElementById("solo_plataforma").checked,
+          exclusiva_hasta: exclusiva_hasta_val ? new Date(exclusiva_hasta_val).toISOString() : null,
+        });
+        window.location.href = "/pages/empresa/mis-vacantes.html";
+      } catch (err) {
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = "block";
+        btn.disabled = false;
+        btn.textContent = "Publicar vacante";
+      }
+    });
+  </script>
+</body>
+</html>

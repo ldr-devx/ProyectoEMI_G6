@@ -41,6 +41,7 @@ export const api = {
   // Postulaciones
   postular: (vacante_id) => apiFetch("/postulaciones/", { method: "POST", body: JSON.stringify({ vacante_id }) }),
   misPostulaciones: () => apiFetch("/postulaciones/mis-postulaciones"),
+  postulacionesPorVacante: (vacante_id) => apiFetch(`/postulaciones/vacante/${vacante_id}`),
   actualizarEstado: (id, body) => apiFetch(`/postulaciones/${id}/estado`, { method: "PUT", body: JSON.stringify(body) }),
 
   // Moderación
@@ -52,4 +53,11 @@ export const api = {
   getNotificaciones: () => apiFetch("/notificaciones/"),
   marcarLeida: (id) => apiFetch(`/notificaciones/${id}/leer`, { method: "PUT" }),
   marcarTodasLeidas: () => apiFetch("/notificaciones/leer-todas", { method: "PUT" }),
+
+  // Certificaciones
+  agregarCertificacion: (body) => apiFetch("/certificaciones/", { method: "POST", body: JSON.stringify(body) }),
+  misCertificaciones: () => apiFetch("/certificaciones/mis-certificaciones"),
+  certsPendientes: () => apiFetch("/certificaciones/pendientes"),
+  verificarCert: (id) => apiFetch(`/certificaciones/${id}/verificar`, { method: "PUT" }),
+  rechazarCert: (id) => apiFetch(`/certificaciones/${id}/rechazar`, { method: "PUT" }),
 };

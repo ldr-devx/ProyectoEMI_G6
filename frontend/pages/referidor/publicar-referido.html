@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Publicar referido</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 680px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .page-title { font-family: var(--font-heading); font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .section-label { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.5; margin-bottom: var(--space-3); }
+    .form-section { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-5); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    .nota-hint { font-size: 12px; opacity: 0.55; font-style: italic; margin-top: -var(--space-2); }
+    .btn-row { display: flex; gap: var(--space-3); justify-content: flex-end; }
+    #errorMsg { font-size: 13px; color: var(--color-error, #f87171); display: none; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/pages/referidor/home.html" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+  </nav>
+
+  <main class="page">
+    <div>
+      <p style="font-size:13px; opacity:0.5; margin-bottom:var(--space-1);">Referidor</p>
+      <h1 class="page-title">🤝 Publicar referido</h1>
+    </div>
+
+    <!-- Información del puesto -->
+    <div class="card blueprint form-section" style="border-style:dashed; border-color:color-mix(in oklch, var(--color-accent-2) 50%, transparent);">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <p class="section-label">Información del puesto que dejas</p>
+
+      <div class="field">
+        <label class="label">Nombre del puesto *</label>
+        <input type="text" id="puesto" class="input" placeholder="Ej. Analista de Sistemas" />
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="label">Empresa *</label>
+          <input type="text" id="empresa_nombre" class="input" placeholder="Nombre de la empresa" />
+        </div>
+        <div class="field">
+          <label class="label">Ubicación</label>
+          <input type="text" id="ubicacion" class="input" placeholder="Ej. Ciudad de Guatemala" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Descripción del puesto *</label>
+        <textarea id="descripcion" class="input" rows="4" placeholder="¿En qué consiste el trabajo? ¿Cómo es el ambiente?" style="resize:vertical;"></textarea>
+      </div>
+
+      <div class="field">
+        <label class="label">Requisitos</label>
+        <textarea id="requisitos" class="input" rows="3" placeholder="Habilidades o experiencia necesaria..." style="resize:vertical;"></textarea>
+      </div>
+
+      <div class="field">
+        <label class="label">Tu nota personal *</label>
+        <textarea id="nota_personal" class="input" rows="3" placeholder='Ej. "Es un excelente equipo, aprendí mucho. Recomiendo a alguien proactivo de Sistemas."' style="resize:vertical;"></textarea>
+        <p class="nota-hint">Aparecerá en la tarjeta de la vacante tal como la escribas.</p>
+      </div>
+
+      <div class="field">
+        <label class="label">Enlace oficial de postulación (opcional)</label>
+        <input type="url" id="enlace_oficial" class="input" placeholder="https://empresa.com/careers/..." />
+      </div>
+    </div>
+
+    <!-- Perfil del candidato -->
+    <div class="card form-section" style="border:1px solid var(--color-neutral-200);">
+      <p class="section-label">Perfil del candidato ideal</p>
+
+      <div class="field">
+        <label class="label">Carrera compatible *</label>
+        <select id="carrera_compatible" class="input">
+          <option value="">Selecciona una carrera</option>
+          <option value="Ingeniería en Ciencias y Sistemas">Ingeniería en Ciencias y Sistemas</option>
+          <option value="Ingeniería Civil">Ingeniería Civil</option>
+          <option value="Ingeniería Mecánica">Ingeniería Mecánica</option>
+          <option value="Ingeniería Eléctrica">Ingeniería Eléctrica</option>
+          <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+          <option value="Ingeniería Química">Ingeniería Química</option>
+          <option value="Todas">Todas las carreras</option>
+        </select>
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label class="label">Semestre mínimo</label>
+          <input type="number" id="semestre_minimo" class="input" min="1" max="12" value="1" />
+        </div>
+        <div class="field">
+          <label class="label">Modalidad *</label>
+          <select id="modalidad" class="input">
+            <option value="presencial">Presencial</option>
+            <option value="remoto">Remoto</option>
+            <option value="hibrido">Híbrido</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field">
+        <label class="label">Tipo de contrato *</label>
+        <select id="tipo_contrato" class="input">
+          <option value="tiempo_completo">Tiempo completo</option>
+          <option value="medio_tiempo">Medio tiempo</option>
+          <option value="practica">Práctica / Pasantía</option>
+          <option value="freelance">Freelance</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="errorMsg"></div>
+
+    <div class="btn-row">
+      <a href="/pages/referidor/home.html" class="btn btn-ghost">Cancelar</a>
+      <button class="btn btn-primary" id="publicarBtn">Publicar referido</button>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    const user = auth.requireAuth(["referidor"]);
+    if (!user) throw new Error("No auth");
+
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    // Autocompletar carrera compatible desde perfil
+    api.getMe().then(perfil => {
+      if (perfil.carrera_egresada) document.getElementById("carrera_compatible").value = perfil.carrera_egresada;
+    }).catch(() => {});
+
+    document.getElementById("publicarBtn").addEventListener("click", async () => {
+      const puesto = document.getElementById("puesto").value.trim();
+      const empresa_nombre = document.getElementById("empresa_nombre").value.trim();
+      const carrera_compatible = document.getElementById("carrera_compatible").value;
+      const descripcion = document.getElementById("descripcion").value.trim();
+      const nota_personal = document.getElementById("nota_personal").value.trim();
+
+      if (!puesto || !empresa_nombre || !carrera_compatible || !descripcion || !nota_personal) {
+        return alert("Completa los campos obligatorios (*). La nota personal es requerida en referidos.");
+      }
+
+      const btn = document.getElementById("publicarBtn");
+      const errorMsg = document.getElementById("errorMsg");
+      btn.disabled = true;
+      btn.textContent = "Publicando...";
+      errorMsg.style.display = "none";
+
+      try {
+        await api.publicarVacante({
+          tipo: "referido",
+          puesto,
+          empresa_nombre,
+          carrera_compatible,
+          semestre_minimo: Number(document.getElementById("semestre_minimo").value) || 1,
+          modalidad: document.getElementById("modalidad").value,
+          tipo_contrato: document.getElementById("tipo_contrato").value,
+          ubicacion: document.getElementById("ubicacion").value.trim() || null,
+          descripcion,
+          requisitos: document.getElementById("requisitos").value.trim() || null,
+          nota_personal,
+          enlace_oficial: document.getElementById("enlace_oficial").value.trim() || null,
+        });
+        window.location.href = "/pages/empresa/mis-vacantes.html";
+      } catch (err) {
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = "block";
+        btn.disabled = false;
+        btn.textContent = "Publicar referido";
+      }
+    });
+  </script>
+</body>
+</html>

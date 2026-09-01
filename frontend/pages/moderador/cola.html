@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cola de moderación</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 860px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .page-title { font-family: var(--font-heading); font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .vacante-list { display: flex; flex-direction: column; gap: var(--space-3); }
+    .vacante-row { display: flex; flex-direction: column; gap: var(--space-3); padding: var(--space-5); }
+    .row-top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; }
+    .row-info { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+    .row-puesto { font-family: var(--font-heading); font-size: 16px; font-weight: 700; }
+    .row-meta { font-size: 13px; opacity: 0.6; }
+    .tags-row { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .empty-state { text-align:center; padding:var(--space-12) var(--space-6); display:flex; flex-direction:column; align-items:center; gap:var(--space-3); }
+    .empty-icon { font-size:40px; opacity:0.4; }
+    .empty-title { font-family:var(--font-heading); font-size:16px; font-weight:700; opacity:0.5; text-transform:uppercase; letter-spacing:0.06em; }
+    .spinner { text-align:center; padding:var(--space-10); opacity:0.4; font-size:13px; }
+    /* Dialog */
+    .dialog-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.55); display:flex; align-items:center; justify-content:center; z-index:100; padding:var(--space-4); }
+    .dialog-backdrop[hidden] { display:none; }
+    .dialog { width:100%; max-width:520px; padding:var(--space-6); display:flex; flex-direction:column; gap:var(--space-4); }
+    .dialog-title { font-family:var(--font-heading); font-size:18px; font-weight:700; }
+    .dialog-body { font-size:14px; line-height:1.7; opacity:0.8; max-height:240px; overflow-y:auto; white-space:pre-wrap; }
+    .dialog-actions { display:flex; gap:var(--space-3); justify-content:flex-end; margin-top:var(--space-2); }
+    .motivo-field { display:none; }
+    .toast { position:fixed; bottom:var(--space-6); right:var(--space-6); padding:var(--space-3) var(--space-5); border-radius:var(--radius-md); font-size:14px; font-weight:600; z-index:200; transition:opacity 0.3s; }
+    .toast-ok { background:var(--color-accent); color:var(--color-bg); }
+    .toast-err { background:#f87171; color:#fff; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/pages/moderador/home.html" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <div style="display:flex; gap:var(--space-3); align-items:center;">
+      <span class="tag tag-accent-2">Moderador</span>
+      <a href="/pages/moderador/historial.html" class="btn btn-ghost" style="font-size:14px;">Historial</a>
+      <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+    </div>
+  </nav>
+
+  <main class="page">
+    <div style="display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:var(--space-3);">
+      <h1 class="page-title">⏳ Cola de verificación</h1>
+      <span style="font-size:13px; opacity:0.5; font-family:var(--font-heading); letter-spacing:0.06em;" id="counter"></span>
+    </div>
+    <div id="lista"><div class="spinner">Cargando...</div></div>
+  </main>
+
+  <!-- Dialog de revisión -->
+  <div class="dialog-backdrop" id="backdrop" hidden>
+    <div class="card blueprint dialog" id="dialog">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <div class="dialog-title" id="dialogPuesto"></div>
+      <div style="display:flex; gap:var(--space-2); flex-wrap:wrap;" id="dialogTags"></div>
+      <div class="dialog-body" id="dialogDescripcion"></div>
+      <div class="field motivo-field" id="motivoField">
+        <label class="label">Motivo del rechazo</label>
+        <input type="text" id="motivoInput" class="input" placeholder="Ej. Contenido no compatible con la comunidad FIUSAC" />
+      </div>
+      <div class="dialog-actions">
+        <button class="btn btn-ghost" id="cancelarBtn">Cancelar</button>
+        <button class="btn btn-ghost" id="rechazarBtn" style="color:#f87171; border-color:#f87171;">Rechazar</button>
+        <button class="btn btn-primary" id="aprobarBtn">Aprobar</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    auth.requireAuth(["moderador"]);
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    const CONTRATO_LABELS = { tiempo_completo: "Tiempo completo", medio_tiempo: "Medio tiempo", practica: "Práctica", freelance: "Freelance" };
+    const MODALIDAD_LABELS = { presencial: "Presencial", remoto: "Remoto", hibrido: "Híbrido" };
+
+    let vacantes = [];
+    let vacanteActiva = null;
+
+    function toast(msg, tipo = "ok") {
+      const t = document.createElement("div");
+      t.className = `toast toast-${tipo}`;
+      t.textContent = msg;
+      document.body.appendChild(t);
+      setTimeout(() => { t.style.opacity = "0"; setTimeout(() => t.remove(), 300); }, 2500);
+    }
+
+    function renderVacante(v) {
+      const esRef = v.tipo === "referido";
+      return `
+        <div class="card ${esRef ? '' : 'blueprint'} vacante-row" data-id="${v.id}"
+          ${esRef ? 'style="border:1px dashed color-mix(in oklch, var(--color-accent-2) 50%, transparent);"' : ''}>
+          ${esRef ? '' : '<i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>'}
+          <div class="row-top">
+            <div class="row-info">
+              <div class="row-puesto">${v.puesto}</div>
+              <div class="row-meta">${v.empresa_nombre}${v.ubicacion ? ' · ' + v.ubicacion : ''}</div>
+            </div>
+            <span class="tag ${esRef ? 'tag-accent-2' : 'tag-accent'}">${esRef ? 'Referido' : 'Empresa'}</span>
+          </div>
+          <div class="tags-row">
+            <span class="tag tag-neutral">${v.carrera_compatible}</span>
+            <span class="tag tag-neutral">Sem. mín. ${v.semestre_minimo}</span>
+            <span class="tag tag-neutral">${MODALIDAD_LABELS[v.modalidad] || v.modalidad}</span>
+            <span class="tag tag-neutral">${CONTRATO_LABELS[v.tipo_contrato] || v.tipo_contrato}</span>
+          </div>
+          <div style="display:flex; justify-content:flex-end;">
+            <button class="btn btn-primary btn-revisar" data-id="${v.id}" style="font-size:13px;">Revisar →</button>
+          </div>
+        </div>`;
+    }
+
+    function abrirDialog(v) {
+      vacanteActiva = v;
+      document.getElementById("dialogPuesto").textContent = `${v.puesto} — ${v.empresa_nombre}`;
+      document.getElementById("dialogTags").innerHTML = `
+        <span class="tag ${v.tipo === 'referido' ? 'tag-accent-2' : 'tag-accent'}">${v.tipo === 'referido' ? 'Referido' : 'Empresa'}</span>
+        <span class="tag tag-neutral">${v.carrera_compatible}</span>
+        <span class="tag tag-neutral">Sem. mín. ${v.semestre_minimo}</span>
+      `;
+      const desc = [v.descripcion, v.requisitos ? `\nRequisitos:\n${v.requisitos}` : '', v.nota_personal ? `\nNota del referidor:\n"${v.nota_personal}"` : ''].filter(Boolean).join('\n');
+      document.getElementById("dialogDescripcion").textContent = desc;
+      document.getElementById("motivoField").style.display = "none";
+      document.getElementById("motivoInput").value = "";
+      document.getElementById("aprobarBtn").style.display = "inline-flex";
+      document.getElementById("rechazarBtn").textContent = "Rechazar";
+      document.getElementById("backdrop").hidden = false;
+    }
+
+    function cerrarDialog() {
+      document.getElementById("backdrop").hidden = true;
+      vacanteActiva = null;
+    }
+
+    async function cargar() {
+      try {
+        vacantes = await api.getCola();
+        const lista = document.getElementById("lista");
+        const counter = document.getElementById("counter");
+
+        counter.textContent = `${vacantes.length} vacante${vacantes.length !== 1 ? 's' : ''} en cola`;
+
+        if (!vacantes.length) {
+          lista.innerHTML = `
+            <div class="empty-state">
+              <div class="empty-icon">✓</div>
+              <div class="empty-title">Cola vacía</div>
+              <div class="empty-sub">No hay vacantes pendientes de revisión.</div>
+            </div>`;
+          return;
+        }
+
+        lista.innerHTML = `<div class="vacante-list">${vacantes.map(renderVacante).join("")}</div>`;
+
+        document.querySelectorAll(".btn-revisar").forEach(btn => {
+          btn.addEventListener("click", () => {
+            const id = Number(btn.dataset.id);
+            const v = vacantes.find(x => x.id === id);
+            if (v) abrirDialog(v);
+          });
+        });
+      } catch (err) {
+        document.getElementById("lista").innerHTML = `<p style="opacity:0.5; font-size:14px;">Error: ${err.message}</p>`;
+      }
+    }
+
+    document.getElementById("cancelarBtn").addEventListener("click", cerrarDialog);
+    document.getElementById("backdrop").addEventListener("click", (e) => { if (e.target === document.getElementById("backdrop")) cerrarDialog(); });
+
+    let esperandoMotivo = false;
+
+    document.getElementById("rechazarBtn").addEventListener("click", async () => {
+      if (!vacanteActiva) return;
+
+      if (!esperandoMotivo) {
+        esperandoMotivo = true;
+        document.getElementById("motivoField").style.display = "block";
+        document.getElementById("aprobarBtn").style.display = "none";
+        document.getElementById("rechazarBtn").textContent = "Confirmar rechazo";
+        return;
+      }
+
+      const motivo = document.getElementById("motivoInput").value.trim();
+      const btn = document.getElementById("rechazarBtn");
+      btn.disabled = true;
+
+      try {
+        await api.moderarVacante(vacanteActiva.id, { accion: "rechazar", motivo });
+        toast("Vacante rechazada", "err");
+        cerrarDialog();
+        esperandoMotivo = false;
+        await cargar();
+      } catch (err) {
+        toast("Error: " + err.message, "err");
+        btn.disabled = false;
+      }
+    });
+
+    document.getElementById("aprobarBtn").addEventListener("click", async () => {
+      if (!vacanteActiva) return;
+      const btn = document.getElementById("aprobarBtn");
+      btn.disabled = true;
+      btn.textContent = "Aprobando...";
+
+      try {
+        await api.moderarVacante(vacanteActiva.id, { accion: "aprobar", motivo: "" });
+        toast("✓ Vacante aprobada y publicada en el feed");
+        cerrarDialog();
+        await cargar();
+      } catch (err) {
+        toast("Error: " + err.message, "err");
+        btn.disabled = false;
+        btn.textContent = "Aprobar";
+      }
+    });
+
+    cargar();
+  </script>
+</body>
+</html>

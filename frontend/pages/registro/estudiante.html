@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro — Estudiante / Egresado</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; display: flex; align-items: center; justify-content: center; padding: var(--space-8) var(--space-4); }
+    .form-card { width: 100%; max-width: 480px; padding: var(--space-8); display: flex; flex-direction: column; gap: var(--space-6); }
+    .form-title { font-family: var(--font-heading); font-size: 22px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; }
+    .form-sub { font-size: 13px; opacity: 0.6; margin-top: -var(--space-4); }
+    .step { display: flex; flex-direction: column; gap: var(--space-4); }
+    .step[hidden] { display: none; }
+    .step-indicator { display: flex; gap: var(--space-2); align-items: center; }
+    .step-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-neutral-400); transition: background 0.2s; }
+    .step-dot.active { background: var(--color-accent); }
+    .step-label { font-size: 12px; opacity: 0.5; font-family: var(--font-heading); letter-spacing: 0.08em; text-transform: uppercase; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+    #errorMsg { color: var(--color-error, #f87171); font-size: 13px; display: none; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <a href="/login.html" class="btn btn-ghost" style="font-size:14px;">Iniciar sesión</a>
+  </nav>
+
+  <main class="page">
+    <div class="card blueprint form-card">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+
+      <div>
+        <div class="form-title">🎓 Registro de Estudiante</div>
+        <p class="form-sub">Crea tu cuenta para acceder a vacantes de tu carrera</p>
+      </div>
+
+      <div class="step-indicator">
+        <div class="step-dot active" id="dot1"></div>
+        <div class="step-dot" id="dot2"></div>
+        <div class="step-dot" id="dot3"></div>
+        <span class="step-label" id="stepLabel">Paso 1 de 3 — Cuenta</span>
+      </div>
+
+      <!-- Paso 1: Cuenta -->
+      <div class="step" id="step1">
+        <div class="field">
+          <label class="label">Correo electrónico</label>
+          <input type="email" id="email" class="input" placeholder="tu.nombre@usac.edu.gt" />
+        </div>
+        <div class="field">
+          <label class="label">Contraseña</label>
+          <input type="password" id="password" class="input" placeholder="Mínimo 8 caracteres" />
+        </div>
+        <div class="field">
+          <label class="label">Confirmar contraseña</label>
+          <input type="password" id="passwordConfirm" class="input" placeholder="Repite la contraseña" />
+        </div>
+        <button class="btn btn-primary" id="btn1">Continuar →</button>
+      </div>
+
+      <!-- Paso 2: Datos personales -->
+      <div class="step" id="step2" hidden>
+        <div class="field">
+          <label class="label">Nombre completo</label>
+          <input type="text" id="nombre" class="input" placeholder="Ej. Ana García López" />
+        </div>
+        <div class="field">
+          <label class="label">Teléfono (opcional)</label>
+          <input type="tel" id="telefono" class="input" placeholder="+502 5555 5555" />
+        </div>
+        <div style="display:flex; gap:var(--space-3);">
+          <button class="btn btn-ghost" id="back1">← Atrás</button>
+          <button class="btn btn-primary" id="btn2" style="flex:1;">Continuar →</button>
+        </div>
+      </div>
+
+      <!-- Paso 3: Datos académicos -->
+      <div class="step" id="step3" hidden>
+        <div class="field">
+          <label class="label">Carrera</label>
+          <select id="carrera" class="input">
+            <option value="">Selecciona tu carrera</option>
+            <option value="Ingeniería en Ciencias y Sistemas">Ingeniería en Ciencias y Sistemas</option>
+            <option value="Ingeniería Civil">Ingeniería Civil</option>
+            <option value="Ingeniería Mecánica">Ingeniería Mecánica</option>
+            <option value="Ingeniería Eléctrica">Ingeniería Eléctrica</option>
+            <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+            <option value="Ingeniería Química">Ingeniería Química</option>
+          </select>
+        </div>
+        <div class="row">
+          <div class="field">
+            <label class="label">Semestre actual</label>
+            <input type="number" id="semestre" class="input" min="1" max="12" placeholder="Ej. 6" />
+          </div>
+          <div class="field">
+            <label class="label">Créditos aprobados</label>
+            <input type="number" id="creditos" class="input" min="0" max="264" placeholder="Ej. 120" />
+          </div>
+        </div>
+        <div class="field">
+          <label class="label">Estado académico</label>
+          <select id="estado_academico" class="input">
+            <option value="activo">Estudiante activo</option>
+            <option value="eps">En EPS / Práctica supervisada</option>
+            <option value="graduado">Graduado / Egresado</option>
+          </select>
+        </div>
+
+        <div id="errorMsg"></div>
+
+        <div style="display:flex; gap:var(--space-3);">
+          <button class="btn btn-ghost" id="back2">← Atrás</button>
+          <button class="btn btn-primary" id="btnRegistrar" style="flex:1;">Crear cuenta</button>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    if (auth.isLoggedIn()) auth.redirectToDashboard();
+
+    const steps = [
+      document.getElementById("step1"),
+      document.getElementById("step2"),
+      document.getElementById("step3"),
+    ];
+    const dots = [
+      document.getElementById("dot1"),
+      document.getElementById("dot2"),
+      document.getElementById("dot3"),
+    ];
+    const labels = ["Paso 1 de 3 — Cuenta", "Paso 2 de 3 — Datos personales", "Paso 3 de 3 — Datos académicos"];
+    const stepLabel = document.getElementById("stepLabel");
+
+    function goTo(n) {
+      steps.forEach((s, i) => { s.hidden = i !== n; dots[i].classList.toggle("active", i === n); });
+      stepLabel.textContent = labels[n];
+    }
+
+    document.getElementById("btn1").addEventListener("click", () => {
+      const email = document.getElementById("email").value.trim();
+      const pw = document.getElementById("password").value;
+      const pw2 = document.getElementById("passwordConfirm").value;
+      if (!email || !pw) return alert("Completa todos los campos.");
+      if (pw !== pw2) return alert("Las contraseñas no coinciden.");
+      if (pw.length < 8) return alert("La contraseña debe tener al menos 8 caracteres.");
+      goTo(1);
+    });
+
+    document.getElementById("back1").addEventListener("click", () => goTo(0));
+
+    document.getElementById("btn2").addEventListener("click", () => {
+      const nombre = document.getElementById("nombre").value.trim();
+      if (!nombre) return alert("Ingresa tu nombre completo.");
+      goTo(2);
+    });
+
+    document.getElementById("back2").addEventListener("click", () => goTo(1));
+
+    document.getElementById("btnRegistrar").addEventListener("click", async () => {
+      const carrera = document.getElementById("carrera").value;
+      if (!carrera) return alert("Selecciona tu carrera.");
+
+      const btn = document.getElementById("btnRegistrar");
+      const errorMsg = document.getElementById("errorMsg");
+      btn.disabled = true;
+      btn.textContent = "Creando cuenta...";
+      errorMsg.style.display = "none";
+
+      try {
+        const res = await api.registro({
+          email: document.getElementById("email").value.trim(),
+          password: document.getElementById("password").value,
+          tipo_usuario: "estudiante",
+          nombre: document.getElementById("nombre").value.trim(),
+        });
+        auth.saveSession(res);
+
+        // Actualizar datos académicos adicionales
+        await api.updateMe({
+          carrera: document.getElementById("carrera").value,
+          semestre: Number(document.getElementById("semestre").value) || null,
+          creditos_aprobados: Number(document.getElementById("creditos").value) || null,
+          estado_academico: document.getElementById("estado_academico").value,
+        });
+
+        window.location.href = "/pages/estudiante/home.html";
+      } catch (err) {
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = "block";
+        btn.disabled = false;
+        btn.textContent = "Crear cuenta";
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Inicio — Referidor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 860px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .welcome-title { font-family: var(--font-heading); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 700; }
+    .actions-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--space-4); }
+    .action-card { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-5); text-decoration: none; color: inherit; transition: transform 0.15s ease; }
+    .action-card:hover { transform: translateY(-2px); }
+    .action-icon { font-size: 28px; }
+    .action-label { font-family: var(--font-heading); font-weight: 700; font-size: 15px; text-transform: uppercase; letter-spacing: 0.05em; }
+    .action-desc { font-size: 13px; opacity: 0.6; line-height: 1.5; }
+    .section-label { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.5; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <div style="display:flex; gap:var(--space-3); align-items:center;">
+      <span style="font-size:14px; opacity:0.7;" id="userName"></span>
+      <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+    </div>
+  </nav>
+
+  <main class="page">
+    <div>
+      <p class="section-label">Panel de referidor</p>
+      <h1 class="welcome-title" id="welcomeMsg">Bienvenido</h1>
+    </div>
+
+    <div>
+      <p class="section-label" style="margin-bottom:var(--space-4);">Acciones rápidas</p>
+      <div class="actions-grid">
+        <a href="/pages/referidor/publicar-referido.html" class="card blueprint action-card">
+          <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+          <div class="action-icon">🤝</div>
+          <div class="action-label">Publicar referido</div>
+          <div class="action-desc">Comparte el puesto que dejas y recomienda a alguien de tu comunidad.</div>
+        </a>
+
+        <a href="/pages/empresa/mis-vacantes.html" class="card action-card" style="border:1px solid var(--color-neutral-200);">
+          <div class="action-icon">📋</div>
+          <div class="action-label">Mis referidos</div>
+          <div class="action-desc">Revisa el estado de tus publicaciones de referido.</div>
+        </a>
+
+        <a href="/pages/referidor/perfil.html" class="card action-card" style="border:1px solid var(--color-neutral-200);">
+          <div class="action-icon">👤</div>
+          <div class="action-label">Mi perfil</div>
+          <div class="action-desc">Actualiza tu información y carrera de egresado.</div>
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script type="module">
+    import { auth } from "/js/auth.js";
+
+    const user = auth.requireAuth(["referidor"]);
+    if (!user) throw new Error("No auth");
+
+    document.getElementById("welcomeMsg").textContent = `Hola, ${user.nombre}`;
+    document.getElementById("userName").textContent = user.nombre;
+
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+  </script>
+</body>
+</html>

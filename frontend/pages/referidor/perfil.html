@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi perfil — Referidor</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700&family=Barlow:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/_ds/industry-af27d658-deab-4daa-98ba-cd0e1dec356b/styles.css" />
+  <style>
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+    .page { flex: 1; padding: var(--space-8) var(--space-6); max-width: 680px; margin: 0 auto; width: 100%; display: flex; flex-direction: column; gap: var(--space-6); }
+    .section-label { font-family: var(--font-heading); font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase; opacity: 0.5; margin-bottom: var(--space-3); }
+    .profile-header { display: flex; align-items: center; gap: var(--space-4); }
+    .avatar { width: 56px; height: 56px; border-radius: 50%; background: color-mix(in oklch, var(--color-accent-2) 70%, var(--color-accent)); display: flex; align-items: center; justify-content: center; font-family: var(--font-heading); font-size: 22px; font-weight: 700; color: var(--color-bg); flex-shrink: 0; }
+    .profile-name { font-family: var(--font-heading); font-size: 24px; font-weight: 700; }
+    .profile-meta { font-size: 13px; opacity: 0.6; }
+    .profile-section { display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-5); }
+    .btn-row { display: flex; gap: var(--space-3); justify-content: flex-end; }
+    #saveMsg { font-size: 13px; color: var(--color-accent); display: none; }
+    #errorMsg { font-size: 13px; color: var(--color-error, #f87171); display: none; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="/pages/referidor/home.html" class="nav-brand">Empleo USAC · FIUSAC</a>
+    <button class="btn btn-ghost" id="logoutBtn" style="font-size:14px;">Salir</button>
+  </nav>
+
+  <main class="page">
+    <div class="profile-header">
+      <div class="avatar" id="avatar">🤝</div>
+      <div>
+        <div class="profile-name" id="profileName">Cargando...</div>
+        <div class="profile-meta" id="profileMeta"></div>
+      </div>
+    </div>
+
+    <div class="card blueprint profile-section">
+      <i class="corner tl"></i><i class="corner tr"></i><i class="corner bl"></i><i class="corner br"></i>
+      <p class="section-label">Datos personales</p>
+
+      <div class="field">
+        <label class="label">Nombre completo</label>
+        <input type="text" id="nombre" class="input" placeholder="Tu nombre completo" />
+      </div>
+
+      <div class="field">
+        <label class="label">Correo registrado</label>
+        <span class="input" id="emailDisplay" style="opacity:0.5; cursor:default; user-select:none; display:block;"></span>
+      </div>
+
+      <div class="field">
+        <label class="label">Carrera de la que egresaste</label>
+        <select id="carrera_egresada" class="input">
+          <option value="">Sin especificar</option>
+          <option value="Ingeniería en Ciencias y Sistemas">Ingeniería en Ciencias y Sistemas</option>
+          <option value="Ingeniería Civil">Ingeniería Civil</option>
+          <option value="Ingeniería Mecánica">Ingeniería Mecánica</option>
+          <option value="Ingeniería Eléctrica">Ingeniería Eléctrica</option>
+          <option value="Ingeniería Industrial">Ingeniería Industrial</option>
+          <option value="Ingeniería Química">Ingeniería Química</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <span id="saveMsg">✓ Perfil actualizado</span>
+      <span id="errorMsg"></span>
+      <button class="btn btn-primary" id="saveBtn">Guardar cambios</button>
+    </div>
+  </main>
+
+  <script type="module">
+    import { api } from "/js/api.js";
+    import { auth } from "/js/auth.js";
+
+    const user = auth.requireAuth(["referidor"]);
+    if (!user) throw new Error("No auth");
+
+    document.getElementById("logoutBtn").addEventListener("click", () => auth.logout());
+
+    async function loadPerfil() {
+      const perfil = await api.getMe();
+
+      const inicial = (perfil.nombre || "?")[0].toUpperCase();
+      document.getElementById("avatar").textContent = inicial;
+      document.getElementById("profileName").textContent = perfil.nombre || "Sin nombre";
+      document.getElementById("profileMeta").textContent = perfil.carrera_egresada ? `Egresado de ${perfil.carrera_egresada}` : "Completa tu perfil";
+      document.getElementById("emailDisplay").textContent = perfil.email;
+
+      document.getElementById("nombre").value = perfil.nombre || "";
+      if (perfil.carrera_egresada) document.getElementById("carrera_egresada").value = perfil.carrera_egresada;
+    }
+
+    loadPerfil();
+
+    document.getElementById("saveBtn").addEventListener("click", async () => {
+      const btn = document.getElementById("saveBtn");
+      const saveMsg = document.getElementById("saveMsg");
+      const errorMsg = document.getElementById("errorMsg");
+      btn.disabled = true;
+      saveMsg.style.display = "none";
+      errorMsg.style.display = "none";
+
+      try {
+        await api.updateMe({
+          nombre: document.getElementById("nombre").value.trim() || undefined,
+          carrera_egresada: document.getElementById("carrera_egresada").value || undefined,
+        });
+        saveMsg.style.display = "inline";
+        setTimeout(() => { saveMsg.style.display = "none"; }, 3000);
+        loadPerfil();
+      } catch (err) {
+        errorMsg.textContent = err.message;
+        errorMsg.style.display = "inline";
+      } finally {
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>
